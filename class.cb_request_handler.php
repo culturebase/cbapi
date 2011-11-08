@@ -1,13 +1,11 @@
 <?php
 
+Cb::import('CbRequestHandlerInterface');
+
 /**
- * Handler for specific requests. This will usually be used by CbContentProvider.
- * Override the handle method to introduce specific behaviour. Once this method
- * is called any required authorization has already been checked. You can throw
- * CbApiExceptions to indicate any errors. Otherwise return anything encodable
- * by the CbContentFormatter being used as result from the handle method.
+ * Default request handler. Does not actually do anything.
  */
-class CbRequestHandler {
+class CbRequestHandler implements CbRequestHandlerInterface {
 
    /**
     * Default Handler throws an error.
@@ -15,7 +13,6 @@ class CbRequestHandler {
     * @return Anything that can be encoded in JSON.
     */
    function handle(array $params) {
-      throw new CbApiException('Request handler must be overriden', 502);
+      throw new CbApiException(502, 'Request handler must be overriden');
    }
-
 }

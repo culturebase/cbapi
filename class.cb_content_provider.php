@@ -1,5 +1,8 @@
 <?php
 
+Cb::import('InterfaceCbRequestHandler', 'InterfaceCbAuthorizationProvider',
+        'CbRequestHandler', 'CbAuthorizationProvider', 'CbContentFormatter', 'CbApiException');
+
 /**
  * Content providers handle AJAX requests (or any other requests) by clients,
  * execute the necessary actions and output the results in the required format.
@@ -24,9 +27,9 @@ class CbContentProvider {
     * @param CbContentFormatter $formatter Content formatter for the output.
     */
    function __construct(array $handlers = array(),
-           CbRequestHandler $default_handler = null,
-           CbAuthorizationProvider $auth_provider = null,
-           string $default_method = '',
+           InterfaceCbRequestHandler $default_handler = null,
+           InterfaceCbAuthorizationProvider $auth_provider = null,
+           string $default_method = null,
            CbContentFormatter $formatter = null) {
       $this->auth_provider = $auth_provider;
       if ($auth_provider) CbSession::start();
@@ -52,14 +55,14 @@ class CbContentProvider {
 
       if (!$request) $request = $_REQUEST;
       $method = isset($request['method']) ? $request['method'] : $this->default_method;
-      $handler = isset($this->handlers[$method]) ? $this->handlers['method'] : $this->default_handler;
+      $handler = isset($this->handlers[$method]) ? $this->handlers[$method] : $this->default_handler;
       $result = '';
       try {
          if ($this->auth_provider) $auth_provider->assert($method, $request);
          $result = $handler->handle($request);
-      } catch (CbApiExeption $e) {
+      } catch (CbApiException $e) {
          $e->outputHeaders();
-         $result = $e->getMessage();
+         $result = $e->getUserData();
       }
       echo $this->formatter->format($result);
    }

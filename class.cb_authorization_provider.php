@@ -1,10 +1,12 @@
 <?php
 
+Cb::import('CbAuthorizationProviderInterface', 'CbResourceMapper', 'CbApiException');
+
 /**
  * An authorization provider that maps methods and parameters to actions and
  * resources, then checks the ACL system for authorization.
  */
-class CbAuthorizationProvider {
+class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
 
    protected $application;             ///< Application context for ACLS.
    protected $resource_mapping;        ///< Mappers for getting resources from parameters.
@@ -16,7 +18,7 @@ class CbAuthorizationProvider {
     * @param string $application Application context for ACLs.
     * @param array $action_mapping Mapping of methods to actions.
     * @param array $resource_mapping Resource ,appers for mapping parameters to resources.
-    * @param CbResourceMapper $default_mapper Default resource mapper.
+    * @param ICbResourceMapper $default_mapper Default resource mapper.
     */
    function __construct(string $application, array $action_mapping = array(), array $resource_mapping = array(), CbResourceMapper $default_mapper = null) {
       $this->application = $application;
@@ -47,9 +49,9 @@ class CbAuthorizationProvider {
       $acl = new CbAcl($app);
       if ($acl->isAllowed(new CbAclRole($account), $resource, $action)) {
          if ($account == "guest!") {
-            throw new CbApiException("Unauthorized", 401, 'WWW-Authenticate: Basic realm="'.$this->application.'"');
+            throw new CbApiException(401, "Please log in", 'WWW-Authenticate: Basic realm="'.$this->application.'"');
          } else {
-            throw new CbApiException("Forbidden", 403);
+            throw new CbApiException(403);
          }
       }
    }
