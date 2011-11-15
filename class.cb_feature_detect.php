@@ -5,9 +5,10 @@ class CbFeatureDetect {
 
    public function run() {
       if ($_SESSION['feature_detect_running']) {
-         foreach ($_GET as $feature => $value) {
+         foreach ($_POST as $feature => $value) {
             $this->features[$feature] = $value;
          }
+         $_SESSION['feature_detect_running'] = false;
       } else {
          $_SESSION['feature_detect_running'] = true;
          require dirname(__FILE__).'/templates/feature-detect.html';
@@ -16,10 +17,10 @@ class CbFeatureDetect {
    }
 
    public function get($feature) {
-      return isset($this->features[$feature]) ? $this->features[$feature] : false;
+      return array_key_exists($feature, $this->features) ? $this->features[$feature] : false;
    }
 
    public function getAll() {
-      return $features;
+      return $this->features;
    }
 }
