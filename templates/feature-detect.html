@@ -3,34 +3,38 @@
   <head>
     <title></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta http-equiv="Refresh" content="20"/><!-- refresh page after some time to indicate "no JS" -->
+    <meta http-equiv="Refresh" content="5"/><!-- refresh page after some time to indicate "no JS" -->
     <script type="text/javascript" src="/module/jscript/lib/modernizr/modernizr.js"></script>
   </head>
   <body>
-     <form action="" method="POST">
-        <input type="hidden" name="width"/>
-        <input type="hidden" name="height"/>
-        <input type="hidden" name="js" value="true"/>
+     <form action="" method="POST" id="detect-form">
+        <input type="hidden" name="width" id="width-val" />
+        <input type="hidden" name="height" id="height-val" />
+        <input type="hidden" name="js" value="true" />
      </form>
      <script type="text/javascript">
-        var form = document.getElementsByTagName('form')[0];
+        var form = document.getElementsById('detect-form');
+
         function parseModernizr(parent, prefix) {
            for (var test in parent) {
-              if (test.charAt(0) == '_') continue;
-              var type = typeof(parent[test]);
-              if (type == 'string' || type == 'boolean' || type == 'number') {
-                 var el = document.createElement('input');
-                 el.name = prefix + test;
-                 el.type = "hidden";
-                 el.value = parent[test];
-                 form.appendChild(el);
-              } else if (type == 'object') {
-                 parseModernizr(parent[test], prefix + test + '_')
+              if (Object.hasOwnProperty(test)) {
+                 if (test.charAt(0) == '_') continue;
+                 var type = typeof parent[test];
+                 if (type == 'string' || type == 'boolean' || type == 'number') {
+                    var el = document.createElement('input');
+                    el.name = prefix + test;
+                    el.type = "hidden";
+                    el.value = parent[test];
+                    form.appendChild(el);
+                 } else if (type == 'object') {
+                    parseModernizr(parent[test], prefix + test + '_')
+                 }
               }
            }
         }
-        document.getElementsByName("width")[0].value = screen.width;
-        document.getElementsByName("height")[0].value = screen.height;
+
+        document.getElementsById("width-val").value = screen.width;
+        document.getElementsById("height-val").value = screen.height;
         parseModernizr(Modernizr, '');
 
         form.submit();
