@@ -13,11 +13,11 @@
         <input type="hidden" name="js" value="true" />
      </form>
      <script type="text/javascript">
-        var form = document.getElementsById('detect-form');
+        var form = document.getElementById('detect-form');
 
         function parseModernizr(parent, prefix) {
            for (var test in parent) {
-              if (Object.hasOwnProperty(test)) {
+              if (parent.hasOwnProperty(test)) {
                  if (test.charAt(0) == '_') continue;
                  var type = typeof parent[test];
                  if (type == 'string' || type == 'boolean' || type == 'number') {
@@ -33,8 +33,8 @@
            }
         }
 
-        document.getElementsById("width-val").value = screen.width;
-        document.getElementsById("height-val").value = screen.height;
+        document.getElementById("width-val").value = screen.width;
+        document.getElementById("height-val").value = screen.height;
         parseModernizr(Modernizr, '');
 
         form.submit();
