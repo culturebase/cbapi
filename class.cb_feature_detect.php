@@ -5,8 +5,17 @@ class CbFeatureDetect {
 
    public function run() {
       if ($_SESSION['feature_detect_running']) {
-         $this->features = $_POST;
-         
+         foreach($_POST as $name => $value) {
+            if ($value === 'true') {
+               $this->features[$name] = true;
+            } else if ($value === 'false') {
+               $this->features[$name] = false;
+            } else if (is_numeric($value)) {
+               $this->features[$name] = $value + 0;
+            } else {
+               $this->features[$name] = $value;
+            }
+         }
          $_SESSION['feature_detect_running'] = false;
       } else {
          $_SESSION['feature_detect_running'] = true;
