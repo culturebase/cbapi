@@ -10,6 +10,9 @@
      <form action="" method="POST" id="detect-form">
         <input type="hidden" name="width" id="width-val" />
         <input type="hidden" name="height" id="height-val" />
+        <input type="hidden" name="webkitpoint" id="web-kit-point-val" />
+        <input type="hidden" name="eventlistener" id="event-listener" />
+        <input type="hidden" name="contextualfragment" id="contextual-fragment" />
         <input type="hidden" name="js" value="true" />
      </form>
      <script type="text/javascript">
@@ -35,6 +38,9 @@
 
         document.getElementById("width-val").value = screen.width;
         document.getElementById("height-val").value = screen.height;
+        document.getElementById("web-kit-point-val").value = ('WebKitPoint' in window);
+        document.getElementById("event-listener").value = ('addEventListener' in window && 'removeEventListener' in window);
+        document.getElementById("contextual-fragment").value = (typeof Range !== "undefined" && 'createContextualFragment' in Range.prototype);
         parseModernizr(Modernizr, '');
 
         form.submit();
