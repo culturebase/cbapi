@@ -20,9 +20,12 @@ class CbFeatureDetect {
          }
          $_SESSION['feature_detect_running'] = false;
       } else {
-         $_SESSION['feature_detect_running'] = true;
-         require dirname(__FILE__) . '/templates/feature-detect.html';
-         die();
+         $this->features = get_browser(null, true);
+         if ($this->features['cookies'] && $this->features['javascript']) {
+            $_SESSION['feature_detect_running'] = true;
+            require dirname(__FILE__) . '/templates/feature-detect.html';
+            die();
+         }
       }
    }
 
