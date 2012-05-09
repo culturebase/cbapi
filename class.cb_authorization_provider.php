@@ -20,7 +20,7 @@ class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
     * @param array $resource_mapping Resource ,appers for mapping parameters to resources.
     * @param ICbResourceMapper $default_mapper Default resource mapper.
     */
-   function __construct(string $application, array $action_mapping = array(), array $resource_mapping = array(), CbResourceMapper $default_mapper = null) {
+   function __construct($application, array $action_mapping = array(), array $resource_mapping = array(), CbResourceMapper $default_mapper = null) {
       $this->application = $application;
       $this->resource_mapping = $resource_mapping;
       $this->action_mapping = $action_mapping;
@@ -33,7 +33,7 @@ class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
     * @param string $method Method to be executed.
     * @param array $params Parameters for the method.
     */
-   function assert(string $method, array $params) {
+   function assert($method, array $params) {
       $action = $action_mapping[$method];
       if (!$action) $action = $method;
       $resource_mapper = $resource_mapping[$action];

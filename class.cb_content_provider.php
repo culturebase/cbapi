@@ -27,8 +27,8 @@ class CbContentProvider {
     * @param CbContentFormatter $formatter Content formatter for the output.
     */
    function __construct(array $handlers = array(),
-           InterfaceCbRequestHandler $default_handler = null,
-           InterfaceCbAuthorizationProvider $auth_provider = null,
+           CbRequestHandlerInterface $default_handler = null,
+           CbAuthorizationProviderInterface $auth_provider = null,
            string $default_method = null,
            CbContentFormatter $formatter = null) {
       $this->auth_provider = $auth_provider;
@@ -53,13 +53,13 @@ class CbContentProvider {
          CbAuth::login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
       }
 
-      if (!$request) $request = $_REQUEST;
+      if (!$request) $request = array_merge($_COOKIE, $_POST, $_GET);
       $method = isset($request['method']) ? $request['method'] :
-         (isset($this->default_method) ? $this->default_method : $_SERVER['REQUEST_METHOD']);
+         (isset($this->default_method) ? $this->default_method : strtolower($_SERVER['REQUEST_METHOD']));
       $handler = isset($this->handlers[$method]) ? $this->handlers[$method] : $this->default_handler;
       $result = '';
       try {
-         if ($this->auth_provider) $auth_provider->assert($method, $request);
+         if ($this->auth_provider) $this->auth_provider->assert($method, $request);
          $result = $handler->handle($request);
       } catch (CbApiException $e) {
          $e->outputHeaders();

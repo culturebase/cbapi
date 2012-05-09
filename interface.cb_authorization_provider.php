@@ -12,5 +12,5 @@ interface CbAuthorizationProviderInterface {
     * @param string $method Method to be executed.
     * @param array $params Parameters for the method.
     */
-   public function assert(string $method, array $params);
+   public function assert($method, array $params);
 }
