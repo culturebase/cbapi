@@ -54,7 +54,8 @@ class CbContentProvider {
       }
 
       if (!$request) $request = $_REQUEST;
-      $method = isset($request['method']) ? $request['method'] : $this->default_method;
+      $method = isset($request['method']) ? $request['method'] :
+         (isset($this->default_method) ? $this->default_method : $_SERVER['REQUEST_METHOD']);
       $handler = isset($this->handlers[$method]) ? $this->handlers[$method] : $this->default_handler;
       $result = '';
       try {
