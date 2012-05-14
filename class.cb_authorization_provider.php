@@ -17,7 +17,7 @@ class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
     * Create an authorization provider.
     * @param string $application Application context for ACLs.
     * @param array $action_mapping Mapping of methods to actions.
-    * @param array $resource_mapping Resource ,appers for mapping parameters to resources.
+    * @param array $resource_mapping Resource mappers for mapping parameters to resources.
     * @param ICbResourceMapper $default_mapper Default resource mapper.
     */
    function __construct($application, array $action_mapping = array(), array $resource_mapping = array(), CbResourceMapper $default_mapper = null) {
@@ -40,16 +40,16 @@ class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
       if (!$resource_mapper) $resource_mapper = $this->default_resource_mapper;
       $resource = $resource_mapper->get($params);
 
-      $account = "guest!";
+      $account = null;
       if (CbSession::has('auth') && is_array(CbSession::get('auth'))) {
          $auth = new CbObj(CbSession::get('auth'));
          if ($auth->isAuthenticated) $account = $auth->account;
       }
 
-      $acl = new CbAcl($app);
-      if ($acl->isAllowed(new CbAclRole($account), $resource, $action)) {
-         if ($account == "guest!") {
-            throw new CbApiException(401, "Please log in", 'WWW-Authenticate: Basic realm="'.$this->application.'"');
+      $acl = new CbAcl($this->application);
+      if (!$acl->isAllowed($account, $resource, $action)) {
+         if ($account === null) {
+            throw new CbApiException(401, "Please log in", array('WWW-Authenticate: Basic realm="'.$this->application.'"'));
          } else {
             throw new CbApiException(403);
          }
