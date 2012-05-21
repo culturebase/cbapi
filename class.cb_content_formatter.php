@@ -14,4 +14,8 @@ class CbContentFormatter {
    public function format($content) {
       return json_encode($content);
    }
+   
+   public function contentType() {
+      return "application/json; charset=utf-8";
+   }
 }

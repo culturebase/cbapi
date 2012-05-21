@@ -65,6 +65,7 @@ class CbContentProvider {
          $e->outputHeaders();
          $result = $e->getUserData();
       }
+      header('Content-type: ' . $this->formatter->contentType());
       echo $this->formatter->format($result);
    }
 }
