@@ -1,7 +1,6 @@
 <?php
 
-Cb::import('InterfaceCbRequestHandler', 'InterfaceCbAuthorizationProvider',
-        'CbRequestHandler', 'CbAuthorizationProvider', 'CbContentFormatter', 'CbApiException');
+Cb::import('CbAbstractProvider', 'CbRequestHandler');
 
 /**
  * Content providers handle AJAX requests (or any other requests) by clients,
@@ -11,12 +10,8 @@ Cb::import('InterfaceCbRequestHandler', 'InterfaceCbAuthorizationProvider',
  * which checks if the specified method is allowed. If no authorization provider
  * is given all actions are allowed.
  */
-class CbContentProvider {
-   protected $auth_provider;   ///< Authorization provider to check ACLs.
-   protected $handlers;        ///< Handlers for specific methods.
-   protected $default_handler; ///< Handler to be called if no specific handler is given.
+class CbContentProvider extends CbAbstractProvider {
    protected $default_method;  ///< Method to be called if none is specified.
-   protected $formatter;       ///< Formatter for the output.
 
    /**
     * Create a content provider.
@@ -31,12 +26,15 @@ class CbContentProvider {
            CbAuthorizationProviderInterface $auth_provider = null,
            string $default_method = null,
            CbContentFormatter $formatter = null) {
-      $this->auth_provider = $auth_provider;
-      if ($auth_provider) CbSession::start();
-      $this->handlers = $handlers;
-      $this->default_handler = $default_handler ? $default_handler : new CbRequestHandler();
+      parent::__construct($handlers,
+            $default_handler ? $default_handler : new CbRequestHandler(),
+            $auth_provider, $formatter);
       $this->default_method = $default_method;
-      $this->formatter = $formatter ? $formatter : new CbContentFormatter();
+   }
+
+   protected function execHandler($method, $request) {
+      $handler = isset($this->handlers[$method]) ? $this->handlers[$method] : $this->default_handler;
+      return $handler->handle($request);
    }
 
    /**
@@ -46,26 +44,10 @@ class CbContentProvider {
     * @param array $request Request to be handled. If null, use $_REQUEST instead.
     */
    function handle(array $request = null) {
-      /* allow inline HTTP login; as we provide 401 we should do this. */
-      if (isset($_SERVER['PHP_AUTH_USER']) && (!isset($_SESSION['auth']) ||
-              !isset($_SESSION['auth']['isAuthenticated']) ||
-              $_SESSION['auth']['account'] != $_SERVER['PHP_AUTH_USER'])) {
-         CbAuth::login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
-      }
-
       if (!$request) $request = array_merge($_COOKIE, $_POST, $_GET);
-      $method = isset($request['method']) ? $request['method'] :
-         (isset($this->default_method) ? $this->default_method : strtolower($_SERVER['REQUEST_METHOD']));
-      $handler = isset($this->handlers[$method]) ? $this->handlers[$method] : $this->default_handler;
-      $result = '';
-      try {
-         if ($this->auth_provider) $this->auth_provider->assert($method, $request);
-         $result = $handler->handle($request);
-      } catch (CbApiException $e) {
-         $e->outputHeaders();
-         $result = $e->getUserData();
+      if (!isset($request['method']) && isset($this->default_method)) {
+         $request['method'] = $this->default_method;
       }
-      header('Content-type: ' . $this->formatter->contentType());
-      echo $this->formatter->format($result);
+      return parent::handle($request);
    }
 }
