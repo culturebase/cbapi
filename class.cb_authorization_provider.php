@@ -34,9 +34,9 @@ class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
     * @param array $params Parameters for the method.
     */
    function assert($method, array $params) {
-      $action = $action_mapping[$method];
+      $action = $this->action_mapping[$method];
       if (!$action) $action = $method;
-      $resource_mapper = $resource_mapping[$action];
+      $resource_mapper = $this->resource_mapping[$action];
       if (!$resource_mapper) $resource_mapper = $this->default_resource_mapper;
       $resource = $resource_mapper->get($params);
 
@@ -51,7 +51,7 @@ class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
          if ($account === null) {
             throw new CbApiException(401, "Please log in", array('WWW-Authenticate: Basic realm="'.$this->application.'"'));
          } else {
-            throw new CbApiException(403);
+            throw new CbApiException(403, "You're not allowed to do $action on $resource as $account");
          }
       }
    }
