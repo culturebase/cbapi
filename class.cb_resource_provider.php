@@ -9,7 +9,7 @@ Cb::import('CbAbstractProvider', 'InterfaceCbResourceHandler', 'CbResourceHandle
  * authorization provider which checks if the specified method is allowed on the
  * selected resource. If no authorization provider is given all actions are
  * allowed.
- * 
+ *
  * While CbRequestHandler ist descigned to provide an RPC-like interface this is
  * designed to provide a standard REST interface. Depending on what you want to
  * do you should choose one or the other.
@@ -42,5 +42,13 @@ class CbResourceProvider extends CbAbstractProvider {
       // TODO: throw a proper exception if method doesn't exist (and things like
       //       __call aren't implemented either).
       return $handler->$method($request);
+   }
+
+   public function handle(array $request = null) {
+      // Make sure the method override is lowercase so that it matches ACLs
+      // This cannot be done for the RPC interface as we accept arbitrary
+      // methods there.
+      if (isset($_POST['method'])) $_POST['method'] = strtolower ($_POST['methos']);
+      return parent::handle($request);
    }
 }
