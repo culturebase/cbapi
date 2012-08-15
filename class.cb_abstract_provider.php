@@ -46,7 +46,7 @@ abstract class CbAbstractProvider {
       }
 
       if (!$request) $request = array_merge($_COOKIE, $_POST, $_GET);
-      $method = isset($request['method']) ? $request['method'] : strtolower($_SERVER['REQUEST_METHOD']);
+      $method = strtolower(isset($request['method']) ? $request['method'] : $_SERVER['REQUEST_METHOD']);
       // TODO: there is a standard for providing the HTTP method via POST or GET.
       try {
          if ($this->auth_provider) $this->auth_provider->assert($method, $request);
