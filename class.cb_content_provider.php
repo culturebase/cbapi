@@ -25,10 +25,10 @@ class CbContentProvider extends CbAbstractProvider {
            CbRequestHandlerInterface $default_handler = null,
            CbAuthorizationProviderInterface $auth_provider = null,
            string $default_method = null,
-           CbContentFormatter $formatter = null) {
+           CbContentFormatter $formatter = null, $cache_timeout = 3600) {
       parent::__construct($handlers,
             $default_handler ? $default_handler : new CbRequestHandler(),
-            $auth_provider, $formatter);
+            $auth_provider, $formatter, $cache_timeout);
       $this->default_method = $default_method;
    }
 

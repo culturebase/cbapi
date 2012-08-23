@@ -14,6 +14,7 @@ abstract class CbAbstractProvider {
    protected $handlers;        ///< Handlers for specific methods.
    protected $default_handler; ///< Handler to be called if no specific handler is given.
    protected $formatter;       ///< Formatter for the output.
+   protected $cache_timeout;   ///< Timout for the HTTP cache.
 
    /**
     * Create an abstract provider.
@@ -23,12 +24,14 @@ abstract class CbAbstractProvider {
     * @param CbContentFormatter $formatter Content formatter for the output.
     */
    protected function __construct(array $handlers = array(), $default_handler = null,
-           $auth_provider = null, CbContentFormatter $formatter = null) {
+         $auth_provider = null, CbContentFormatter $formatter = null,
+         $cache_timeout = 3600) {
       $this->auth_provider = $auth_provider;
       if ($auth_provider) CbSession::start();
       $this->handlers = $handlers;
       $this->default_handler = $default_handler;
       $this->formatter = $formatter ? $formatter : new CbContentFormatter();
+      $this->cache_timeout = $cache_timeout;
    }
 
    /**
@@ -38,6 +41,10 @@ abstract class CbAbstractProvider {
     * @param array $request Request to be handled. If null, use $_REQUEST instead.
     */
    public function handle(array $request = null) {
+      header('Content-type: ' . $this->formatter->contentType());
+      header('Cache-Control: max-age=' . $this->cache_timeout);
+      header('Pragma: public');
+
       /* allow inline HTTP login; as we provide 401 we should do this. */
       if (isset($_SERVER['PHP_AUTH_USER']) && (!isset($_SESSION['auth']) ||
               !isset($_SESSION['auth']['isAuthenticated']) ||
@@ -55,7 +62,6 @@ abstract class CbAbstractProvider {
          $e->outputHeaders();
          $result = $e->getUserData();
       }
-      header('Content-type: ' . $this->formatter->contentType());
       echo $this->formatter->format($result);
    }
 

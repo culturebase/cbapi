@@ -29,10 +29,10 @@ class CbResourceProvider extends CbAbstractProvider {
            CbResourceHandlerInterface $default_handler = null,
            CbAuthorizationProviderInterface $auth_provider = null,
            string $default_resource = null,
-           CbContentFormatter $formatter = null) {
+           CbContentFormatter $formatter = null, $cache_timeout = 3600) {
       parent::__construct($handlers,
             isset($default_handler) ? $default_handler : new CbResourceHandler(),
-            $auth_provider, $formatter);
+            $auth_provider, $formatter, $cache_timeout);
       $this->default_resource = $default_resource;
    }
 
