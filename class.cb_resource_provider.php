@@ -24,15 +24,29 @@ class CbResourceProvider extends CbAbstractProvider {
     * @param CbAuthorizationProvider $auth_provider Authorization provider. If null anything is allowed.
     * @param string $default_resource Default resource to be used if none is specified.
     * @param CbContentFormatter $formatter Content formatter for the output.
+    * Alternately specify all params except handlers as hash in second parameter
     */
    public function __construct(array $handlers = array(),
            CbResourceHandlerInterface $default_handler = null,
            CbAuthorizationProviderInterface $auth_provider = null,
            string $default_resource = null,
            CbContentFormatter $formatter = null, $cache_timeout = 3600) {
-      parent::__construct($handlers,
-            isset($default_handler) ? $default_handler : new CbResourceHandler(),
-            $auth_provider, $formatter, $cache_timeout);
+      if (is_array($default_handler)) {
+         $params = array_merge(array(
+            'default_handler' => $default_handler['default_handler'] ? null : new CbResourceHandler(),
+            'auth_provider' => null,
+            'formatter' => null,
+            'cache_timeout' => 3600
+         ), $default_handler);
+      } else {
+         $params = array(
+            'default_handler' => $default_handler ? $default_handler : new CbResourceHandler(),
+            'auth_provider' => $auth_provider,
+            'formatter' => $formatter,
+            'cache_timeout' => $cache_timeout
+         );
+      }
+      parent::__construct($handlers, $params);
       $this->default_resource = $default_resource;
    }
 

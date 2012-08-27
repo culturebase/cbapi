@@ -23,15 +23,13 @@ abstract class CbAbstractProvider {
     * @param CbAuthorizationProvider $auth_provider Authorization provider. If null anything is allowed.
     * @param CbContentFormatter $formatter Content formatter for the output.
     */
-   protected function __construct(array $handlers = array(), $default_handler = null,
-         $auth_provider = null, CbContentFormatter $formatter = null,
-         $cache_timeout = 3600) {
-      $this->auth_provider = $auth_provider;
+   protected function __construct(array $handlers = array(), $params) {
+      $this->auth_provider = $params['auth_provider'];
       if ($auth_provider) CbSession::start();
       $this->handlers = $handlers;
-      $this->default_handler = $default_handler;
-      $this->formatter = $formatter ? $formatter : new CbContentFormatter();
-      $this->cache_timeout = $cache_timeout;
+      $this->default_handler = $params['default_handler'];
+      $this->formatter = $params['formatter'] ? $params['formatter'] : new CbContentFormatter();
+      $this->cache_timeout = $params['cache_timeout'];
    }
 
    /**
@@ -42,8 +40,10 @@ abstract class CbAbstractProvider {
     */
    public function handle(array $request = null) {
       header('Content-type: ' . $this->formatter->contentType());
-      header('Cache-Control: max-age=' . $this->cache_timeout);
-      header('Pragma: public');
+      if ($this->cache_timeout > 0) {
+         header('Cache-Control: max-age=' . $this->cache_timeout);
+         header('Pragma: public');
+      }
 
       /* allow inline HTTP login; as we provide 401 we should do this. */
       if (isset($_SERVER['PHP_AUTH_USER']) && (!isset($_SESSION['auth']) ||
