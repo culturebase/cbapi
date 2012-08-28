@@ -25,7 +25,7 @@ abstract class CbAbstractProvider {
     */
    protected function __construct(array $handlers = array(), $params) {
       $this->auth_provider = $params['auth_provider'];
-      if ($auth_provider) CbSession::start();
+      if ($this->auth_provider) CbSession::start();
       $this->handlers = $handlers;
       $this->default_handler = $params['default_handler'];
       $this->formatter = $params['formatter'] ? $params['formatter'] : new CbContentFormatter();
