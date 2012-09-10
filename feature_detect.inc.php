@@ -3,7 +3,7 @@
   <head>
     <title></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta http-equiv="Refresh" content="5"/><!-- refresh page after some time to indicate "no JS" -->
+    <meta http-equiv="Refresh" content="5; URL='?<?php echo $nojs;?>'"/><!-- refresh page after some time to indicate "no JS" -->
     <script type="text/javascript" src="/module/jscript/lib/modernizr/modernizr.js"></script>
   </head>
   <body>
@@ -17,6 +17,18 @@
      </form>
      <script type="text/javascript">
         var form = document.getElementById('detect-form');
+        var addField = function(prefix, test, value) {
+           var el = document.createElement('input');
+           el.name = prefix + test;
+           el.type = "hidden";
+           el.value = value;
+           form.appendChild(el);
+        };
+
+        if ((document.cookie.match('(^|; )<?php echo $name;?>=([^;]*)') || 0)[2] !== 'running') {
+           form.action = "?<?php echo $nocookies;?>";
+           addField('', 'cookies', false);
+        }
 
         function parseModernizr(parent, prefix) {
            for (var test in parent) {
@@ -24,11 +36,7 @@
                  if (test.charAt(0) == '_') continue;
                  var type = typeof parent[test];
                  if (type == 'string' || type == 'boolean' || type == 'number') {
-                    var el = document.createElement('input');
-                    el.name = prefix + test;
-                    el.type = "hidden";
-                    el.value = parent[test];
-                    form.appendChild(el);
+                    addField(prefix, test, parent[test]);
                  } else if (type == 'object') {
                     parseModernizr(parent[test], prefix + test + '_')
                  }
