@@ -73,9 +73,21 @@ class CbFeatureDetect {
          setcookie($name, 'done');
          return $_SESSION[$name];
       } else {
-         setcookie($name, 'running');
-         require 'feature_detect.inc.php';
-         die();
+         require 'lib/framework/3rdparty/browscap/Browscap.php';
+         $bc = new Browscap('/var/tmp/browscap/');
+         $browser = $bc->getBrowser();
+         if ($browser->JavaScript) {
+            setcookie($name, 'running');
+            require 'feature_detect.inc.php';
+            die();
+         } else {
+            setcookie($name, 'done');
+            $_SESSION[$name] = array(
+               'javascript' => false,
+               'cookies' => ($browser->Cookies !== 0)
+            );
+            return $_SESSION[$name];
+         }
       }
    }
 
