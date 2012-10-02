@@ -62,6 +62,7 @@ class CbResourceProvider extends CbAbstractProvider {
       // Make sure the method override is lowercase so that it matches ACLs
       // This cannot be done for the RPC interface as we accept arbitrary
       // methods there.
+      if (isset($request['method'])) $request['method'] = strtolower($request['method']);
       if (isset($_POST['method'])) $_POST['method'] = strtolower($_POST['method']);
       return parent::handle($request);
    }
