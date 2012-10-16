@@ -7,31 +7,26 @@ Cb::import('CbAbstractProvider');
  * authentication is necessary and the templates are expected as an array of
  * name => absolute_file_name.
  */
-class CbResourceProvider extends CbAbstractProvider {
+class CbTemplateProvider extends CbAbstractProvider {
    protected $default_template; ///< Resource to be used if none is specified.
 
    /**
-    * Create a content provider.
-    * @param array $handlers Handlers for various methods.
-    * @param CbResourceHandler $default_handler Handler to be called for unspecified methods.
-    * @param CbAuthorizationProvider $auth_provider Authorization provider. If null anything is allowed.
-    * @param string $default_resource Default resource to be used if none is specified.
-    * @param CbContentFormatter $formatter Content formatter for the output.
-    * Alternately specify all params except handlers as hash in second parameter
+    * Create a template provider.
+    * @param array $templates Mapping of name => path for templates.
+    * @param string $default_template Template to be used if none is given.
     */
-   public function __construct(array $templates = array(), $default_template) {
+   public function __construct(array $templates = array(), $default_template = null) {
       $params = array(
          'formatter' => new CbHtmlFileFormatter(),
-         'cache_type' => 'public',
-         'cache_strategy' => 'modified_since'
       );
       parent::__construct(null, $params);
       $this->default_template = $default_template;
+      $this->templates = $templates;
    }
 
    private function resolveTemplate($request)
    {
-      return isset($request['template']) ? $request['template'] : $this->default_template;
+      return isset($request['template']) ? $this->templates[$request['template']] : $this->default_template;
    }
 
    protected function execHandler($method, $request) {
@@ -46,6 +41,9 @@ class CbResourceProvider extends CbAbstractProvider {
       if ($method !== 'get') {
          throw new CbApiException(403, 'You cannot modify templates.');
       }
-      return array('last_changed' => filemtime($this->resolveTemplate($request)));
+      return array(
+         'last_modified' => filemtime($this->resolveTemplate($request)),
+         'privacy' => 'public'
+      );
    }
 }
