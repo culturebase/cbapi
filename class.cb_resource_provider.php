@@ -70,7 +70,7 @@ class CbResourceProvider extends CbAbstractProvider {
       parent::handle($request);
    }
 
-   protected function getContentMetadata($method, $request)
+   protected function getMetadata($method, $request)
    {
       $handler = resolveHandler();
       return (method_exists($handler, 'meta') ?

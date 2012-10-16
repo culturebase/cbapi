@@ -38,14 +38,14 @@ class CbResourceProvider extends CbAbstractProvider {
       if ($method !== 'get') {
          throw new CbApiException(403, 'You cannot modify templates.');
       }
-      return $template;
+      return $this->resolveTemplate($request);
    }
 
-   protected function getContentMetadata($method, $request)
+   protected function getMetadata($method, $request)
    {
       if ($method !== 'get') {
          throw new CbApiException(403, 'You cannot modify templates.');
       }
-      return array('modified' => filemtime($this->resolveTemplate($request)));
+      return array('last_changed' => filemtime($this->resolveTemplate($request)));
    }
 }

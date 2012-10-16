@@ -11,7 +11,7 @@ Cb::import("CbHttpResponseCodes");
 class CbApiException extends Exception {
    protected $headers;   ///< Additional HTTP headers.
    protected $user_data; ///< Data to output in HTTP body.
-   
+
 
    /**
     * Create an API exception.

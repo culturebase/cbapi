@@ -15,4 +15,8 @@ interface CbRequestHandlerInterface {
     * @return Anything that can be encoded in JSON.
     */
    public function handle(array $params);
+
+   /*
+    * Optionally implement the meta() method to control caching.
+    */
 }

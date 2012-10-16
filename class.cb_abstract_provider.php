@@ -24,13 +24,13 @@ abstract class CbAbstractProvider {
     * @param CbContentFormatter $formatter Content formatter for the output.
     */
    protected function __construct(array $handlers = array(), $params = array()) {
-      $this->cache_provider = new CbCacheProvider($params);
+      $this->cache_provider = $params['cache_provider'] ?
+            $params['cache_provider'] : new CbCacheProvider();
       $this->auth_provider = $params['auth_provider'];
       $this->handlers = $handlers;
       $this->default_handler = $params['default_handler'];
-      $this->formatter = $params['formatter'] ? $params['formatter'] : new CbContentFormatter();
-
-      if ($this->auth_provider) CbSession::start();
+      $this->formatter = $params['formatter'] ?
+            $params['formatter'] : new CbContentFormatter();
    }
 
    /**
@@ -42,31 +42,34 @@ abstract class CbAbstractProvider {
    public function handle(array $request = null) {
       header('Content-type: ' . $this->formatter->contentType());
 
-      /* allow inline HTTP login; as we provide 401 we should do this. */
-      if (isset($_SERVER['PHP_AUTH_USER']) && (!isset($_SESSION['auth']) ||
-              !isset($_SESSION['auth']['isAuthenticated']) ||
-              $_SESSION['auth']['account'] != $_SERVER['PHP_AUTH_USER'])) {
-         CbAuth::login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
-      }
-
       if (!$request) $request = array_merge($_COOKIE, $_POST, $_GET);
       $method = isset($request['method']) ? $request['method'] : strtolower($_SERVER['REQUEST_METHOD']);
-      // TODO: there is a standard for providing the HTTP method via POST or GET.
+
       try {
-         if ($this->auth_provider) $this->auth_provider->assert($method, $request);
-         if ($this->cache_provider->run($this->getContentMetadata($method, $request))) {
-            $result = $this->execHandler($method, $request);
-         } else {
-            $result = null;
+         if (!$this->cache_provider->run($this->getMetadata($method, $request))) {
+            return;
          }
+
+         if ($this->auth_provider) CbSession::start();
+
+         /* allow inline HTTP login; as we provide 401 we should do this. */
+         if (isset($_SERVER['PHP_AUTH_USER']) && (!isset($_SESSION['auth']) ||
+                 !isset($_SESSION['auth']['isAuthenticated']) ||
+                 $_SESSION['auth']['account'] != $_SERVER['PHP_AUTH_USER'])) {
+            CbAuth::login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
+         }
+
+         // TODO: there is a standard for providing the HTTP method via POST or GET.
+         if ($this->auth_provider) $this->auth_provider->assert($method, $request);
+         $result = $this->execHandler($method, $request);
       } catch (CbApiException $e) {
          $e->outputHeaders();
          $result = $e->getUserData();
       }
-      if ($result !== null) $this->formatter->format($result);
+      $this->formatter->format($result);
    }
 
    abstract protected function execHandler($method, $request);
 
-   abstract protected function getContentMetadata($method, $request);
+   abstract protected function getMetadata($method, $request);
 }

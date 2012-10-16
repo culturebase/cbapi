@@ -36,4 +36,8 @@ interface CbResourceHandlerInterface {
     * @return Anything that can be encoded in JSON.
     */
    public function delete(array $params);
+
+   /*
+    * Optionally implement the meta() method to control caching.
+    */
 }
