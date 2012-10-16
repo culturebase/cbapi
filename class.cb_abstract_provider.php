@@ -14,7 +14,7 @@ abstract class CbAbstractProvider {
    protected $handlers;        ///< Handlers for specific methods.
    protected $default_handler; ///< Handler to be called if no specific handler is given.
    protected $formatter;       ///< Formatter for the output.
-   protected $cache_timeout;   ///< Timout for the HTTP cache.
+   protected $cache_provider;  ///< Timout for the HTTP cache.
 
    /**
     * Create an abstract provider.
@@ -23,13 +23,14 @@ abstract class CbAbstractProvider {
     * @param CbAuthorizationProvider $auth_provider Authorization provider. If null anything is allowed.
     * @param CbContentFormatter $formatter Content formatter for the output.
     */
-   protected function __construct(array $handlers = array(), $params) {
+   protected function __construct(array $handlers = array(), $params = array()) {
+      $this->cache_provider = new CbCacheProvider($params);
       $this->auth_provider = $params['auth_provider'];
-      if ($this->auth_provider) CbSession::start();
       $this->handlers = $handlers;
       $this->default_handler = $params['default_handler'];
       $this->formatter = $params['formatter'] ? $params['formatter'] : new CbContentFormatter();
-      $this->cache_timeout = $params['cache_timeout'];
+
+      if ($this->auth_provider) CbSession::start();
    }
 
    /**
@@ -40,10 +41,6 @@ abstract class CbAbstractProvider {
     */
    public function handle(array $request = null) {
       header('Content-type: ' . $this->formatter->contentType());
-      if ($this->cache_timeout > 0) {
-         header('Cache-Control: max-age=' . $this->cache_timeout);
-         header('Pragma: public');
-      }
 
       /* allow inline HTTP login; as we provide 401 we should do this. */
       if (isset($_SERVER['PHP_AUTH_USER']) && (!isset($_SESSION['auth']) ||
@@ -57,13 +54,19 @@ abstract class CbAbstractProvider {
       // TODO: there is a standard for providing the HTTP method via POST or GET.
       try {
          if ($this->auth_provider) $this->auth_provider->assert($method, $request);
-         $result = $this->execHandler($method, $request);
+         if ($this->cache_provider->run($this->getContentMetadata($method, $request))) {
+            $result = $this->execHandler($method, $request);
+         } else {
+            $result = null;
+         }
       } catch (CbApiException $e) {
          $e->outputHeaders();
          $result = $e->getUserData();
       }
-      echo $this->formatter->format($result);
+      if ($result !== null) $this->formatter->format($result);
    }
 
    abstract protected function execHandler($method, $request);
+
+   abstract protected function getContentMetadata($method, $request);
 }

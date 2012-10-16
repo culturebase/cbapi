@@ -60,6 +60,14 @@ class CbContentProvider extends CbAbstractProvider {
       if (!isset($request['method']) && isset($this->default_method)) {
          $request['method'] = $this->default_method;
       }
-      return parent::handle($request);
+      parent::handle($request);
+   }
+
+   protected function getContentMetadata($method, $request)
+   {
+      $handler = isset($this->handlers[$method]) ? $this->handlers[$method] : $this->default_handler;
+      return (method_exists($handler, 'meta') ?
+            $handler->meta($method, $request) :
+            array());
    }
 }

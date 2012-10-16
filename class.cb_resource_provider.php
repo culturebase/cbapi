@@ -50,12 +50,15 @@ class CbResourceProvider extends CbAbstractProvider {
       $this->default_resource = $default_resource;
    }
 
-   protected function execHandler($method, $request) {
+   private function resolveHandler($request) {
       $resource = isset($request['resource']) ? $request['resource'] : $this->default_resource;
-      $handler = isset($this->handlers[$resource]) ? $this->handlers[$resource] : $this->default_handler;
+      return isset($this->handlers[$resource]) ? $this->handlers[$resource] : $this->default_handler;
+   }
+
+   protected function execHandler($method, $request) {
       // TODO: throw a proper exception if method doesn't exist (and things like
       //       __call aren't implemented either).
-      return $handler->$method($request);
+      return resolveHandler()->$method($request);
    }
 
    public function handle(array $request = null) {
@@ -64,6 +67,14 @@ class CbResourceProvider extends CbAbstractProvider {
       // methods there.
       if (isset($request['method'])) $request['method'] = strtolower($request['method']);
       if (isset($_POST['method'])) $_POST['method'] = strtolower($_POST['method']);
-      return parent::handle($request);
+      parent::handle($request);
+   }
+
+   protected function getContentMetadata($method, $request)
+   {
+      $handler = resolveHandler();
+      return (method_exists($handler, 'meta') ?
+            $handler->meta($method, $request) :
+            array());
    }
 }
