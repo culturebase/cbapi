@@ -2,17 +2,31 @@
 
 class CbFeatureDetect {
 
-   protected static function decodeFeatures()
+   private $session_name;
+   private $nojs;
+   private $nocookies;
+   private $features;
+
+   public function __construct($session_name = 'features', $nojs = 'nojs', $nocookies = 'nocookies')
+   {
+      $this->session_name = $session_name;
+      $this->nocookies = $nocookies;
+      $this->nojs = $nojs;
+      $this->features = array_key_exists($session_name, $_SESSION) ?
+            $_SESSION[$session_name] : array();
+   }
+
+   protected function decodeFeatures()
    {
       foreach ($_POST as $name => $value) {
          if ($value === 'true') {
-            $_SESSION['features'][$name] = true;
+            $this->features[$name] = true;
          } else if ($value === 'false') {
-            $_SESSION['features'][$name] = false;
+            $this->features[$name] = false;
          } else if (is_numeric($value)) {
-            $_SESSION['features'][$name] = $value + 0;
+            $this->features[$name] = $value + 0;
          } else {
-            $_SESSION['features'][$name] = $value;
+            $this->features[$name] = $value;
          }
       }
    }
@@ -58,47 +72,53 @@ class CbFeatureDetect {
     * You should always conserve the $nojs or $nocookies GET parameters in
     * further requests if you intend to re-run this method.
     */
-   public static function run($name = 'features', $nojs = 'nojs', $nocookies = 'nocookies')
+   public static function run($session_name = 'features', $nojs = 'nojs', $nocookies = 'nocookies')
    {
-      if ($_COOKIE[$name] === 'done') {
+      $fd = new CbFeatureDetect($session_name, $nojs, $nocookies);
+      return ($_SESSION[$session_name] = $fd->detect());
+   }
+
+   public function detect()
+   {
+      if ($_COOKIE[$this->session_name] === 'done') {
          // don't rerun, even if features haven't been saved
-         return isset($_SESSION[$name]) ? $_SESSION[$name] : null;
-      } else if ($_COOKIE[$name] === 'running' || isset($_GET[$nojs]) ||
-            !empty($_POST) || isset($_GET[$nocookies])) {
-         $_SESSION[$name] = array(
-            'cookies'    => isset($_COOKIE[$name]),
-            'javascript' => !isset($_GET[$nojs])
+         return $this->features;
+      } else if ($_COOKIE[$this->session_name] === 'running' || isset($_GET[$this->nojs]) ||
+            !empty($_POST) || isset($_GET[$this->nocookies])) {
+         $this->features = array(
+            'cookies'    => isset($_COOKIE[$this->session_name]),
+            'javascript' => !isset($_GET[$this->nojs])
          );
-         self::decodeFeatures();
-         setcookie($name, 'done');
-         return $_SESSION[$name];
+         $this->decodeFeatures();
+         setcookie($this->session_name, 'done');
+         return $this->features;
       } else {
          require 'lib/framework/3rdparty/browscap/Browscap.php';
          $bc = new Browscap('/var/tmp/browscap/');
          $browser = $bc->getBrowser();
          if ($browser->JavaScript) {
-            setcookie($name, 'running');
+            setcookie($this->session_name, 'running');
             require 'feature_detect.inc.php';
             die();
          } else {
-            setcookie($name, 'done');
-            $_SESSION[$name] = array(
+            setcookie($this->session_name, 'done');
+            $this->features = array(
                'javascript' => false,
                'cookies'    => $browser->Cookies
             );
-            return $_SESSION[$name];
+            return $this->features;
          }
       }
    }
 
-   public static function get($feature)
+   public function get($feature)
    {
-      return array_key_exists($feature, $_SESSION['features']) ? $_SESSION['features'][$feature] : false;
+      return array_key_exists($feature, $this->features) ? $this->features[$feature] : false;
    }
 
-   public static function getAll()
+   public function getAll()
    {
-      return $_SESSION['features'];
+      return $this->features;
    }
 
 }

@@ -3,7 +3,7 @@
   <head>
     <title></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta http-equiv="Refresh" content="5; URL='?<?php echo $nojs;?>'"/><!-- refresh page after some time to indicate "no JS" -->
+    <meta http-equiv="Refresh" content="5; URL='?<?php echo $this->nojs;?>'"/><!-- refresh page after some time to indicate "no JS" -->
     <script type="text/javascript" src="/module/jscript/lib/modernizr/modernizr.js"></script>
   </head>
   <body>
@@ -25,8 +25,8 @@
            form.appendChild(el);
         };
 
-        if ((document.cookie.match('(^|; )<?php echo $name;?>=([^;]*)') || 0)[2] !== 'running') {
-           form.action = "?<?php echo $nocookies;?>";
+        if ((document.cookie.match('(^|; )<?php echo $this->session_name;?>=([^;]*)') || 0)[2] !== 'running') {
+           form.action = "?<?php echo $this->nocookies;?>";
            addField('', 'cookies', false);
         }
 
