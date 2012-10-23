@@ -58,7 +58,7 @@ class CbResourceProvider extends CbAbstractProvider {
    protected function execHandler($method, $request) {
       // TODO: throw a proper exception if method doesn't exist (and things like
       //       __call aren't implemented either).
-      return $this->resolveHandler()->$method($request);
+      return $this->resolveHandler($request)->$method($request);
    }
 
    public function handle(array $request = null) {
