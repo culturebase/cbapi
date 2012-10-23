@@ -72,7 +72,7 @@ class CbResourceProvider extends CbAbstractProvider {
 
    protected function getMetadata($method, $request)
    {
-      $handler = $this->resolveHandler();
+      $handler = $this->resolveHandler($request);
       return (method_exists($handler, 'meta') ?
             $handler->meta($method, $request) :
             array());
