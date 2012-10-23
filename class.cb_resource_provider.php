@@ -58,7 +58,7 @@ class CbResourceProvider extends CbAbstractProvider {
    protected function execHandler($method, $request) {
       // TODO: throw a proper exception if method doesn't exist (and things like
       //       __call aren't implemented either).
-      return resolveHandler()->$method($request);
+      return $this->resolveHandler()->$method($request);
    }
 
    public function handle(array $request = null) {
@@ -72,7 +72,7 @@ class CbResourceProvider extends CbAbstractProvider {
 
    protected function getMetadata($method, $request)
    {
-      $handler = resolveHandler();
+      $handler = $this->resolveHandler();
       return (method_exists($handler, 'meta') ?
             $handler->meta($method, $request) :
             array());
