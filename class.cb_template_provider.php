@@ -19,7 +19,7 @@ class CbTemplateProvider extends CbAbstractProvider {
       $params = array(
          'formatter' => new CbHtmlFileFormatter(),
       );
-      parent::__construct(null, $params);
+      parent::__construct(array(), $params);
       $this->default_template = $default_template;
       $this->templates = $templates;
    }

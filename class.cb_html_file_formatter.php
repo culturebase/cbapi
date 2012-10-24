@@ -10,7 +10,7 @@ class CbHtmlFileFormatter extends CbHtmlFormatter {
     */
    public function format($content)
    {
-      if (content === null) return;
+      if ($content === null) return;
       if (is_string($content)) {
          require $content;
       } else {
