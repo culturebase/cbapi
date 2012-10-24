@@ -66,7 +66,12 @@ abstract class CbAbstractProvider {
          $e->outputHeaders();
          $result = $e->getUserData();
       }
-      $this->formatter->format($result);
+      try {
+         $this->formatter->format($result);
+      } catch (CbApiException $e) {
+         $e->outputHeaders();
+         echo "fatal error during output formatting: ".$e->getUserData();
+      }
    }
 
    abstract protected function execHandler($method, $request);
