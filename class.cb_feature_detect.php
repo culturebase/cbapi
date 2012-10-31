@@ -90,18 +90,18 @@ class CbFeatureDetect {
             'javascript' => !isset($_GET[$this->nojs])
          );
          $this->decodeFeatures();
-         setcookie($this->session_name, 'done');
+         setcookie($this->session_name, 'done', 0, '/');
          return $this->features;
       } else {
          require 'lib/framework/3rdparty/browscap/Browscap.php';
          $bc = new Browscap('/var/tmp/browscap/');
          $browser = $bc->getBrowser();
          if ($browser->JavaScript) {
-            setcookie($this->session_name, 'running');
+            setcookie($this->session_name, 'running', 0, '/');
             require 'feature_detect.inc.php';
             die();
          } else {
-            setcookie($this->session_name, 'done');
+            setcookie($this->session_name, 'done', 0, '/');
             $this->features = array(
                'javascript' => false,
                'cookies'    => $browser->Cookies
