@@ -12,6 +12,35 @@ class CbCacheProvider {
    }
 
    /**
+    * Emulate PHP's session cache so that we get the same caching with or
+    * without starting a session. I know this stuff is braindead, but I strongly
+    * suspect some of our applications are depending on it. So we cannot just
+    * set session.cache_limiter to '' in the config.
+    */
+   private function sendHeaders() {
+      $future = gmdate("D, d M Y H:i:s T", time() + session_cache_expire() * 60);
+      $interval = session_cache_expire() * 60;
+      switch (session_cache_limiter()) {
+         case "public":
+            header("Expires: $future");
+            header("Cache-Control: public, max-age=$interval");
+            break;
+         case "private_no_expire":
+            header("Cache-Control: private, max-age=$interval, pre-check=$interval");
+            break;
+         case "private":
+            header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
+            header("Cache-Control: private, max-age=$interval, pre-check=$interval");
+            break;
+         default: // covers 'nocache' and ''
+            header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
+            header("Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
+            header("Pragma: no-cache");
+            break;
+      }
+   }
+
+   /**
     * Output cache headers and determine if content should be created.
     * @param type $meta Meta data about content to be served. Can contain any
     *    combination of the following fields:
@@ -72,6 +101,7 @@ class CbCacheProvider {
          }
          session_cache_limiter($meta['privacy']);
       }
+      $this->sendHeaders();
       return $content;
    }
 }
