@@ -2,11 +2,11 @@
 <html>
   <head>
     <title></title>
-    <meta http-equiv="Refresh" content="5; URL='?<?php echo $this->nojs;?>'"/><!-- refresh page after some time to indicate "no JS" -->
+    <meta http-equiv="Refresh" content="5; URL='?<?php echo $this->js;?>=no'"/><!-- refresh page after some time to indicate "no JS" -->
     <script type="text/javascript" src="/module/jscript/lib/modernizr/modernizr.js"></script>
   </head>
   <body>
-     <form action="" method="POST" id="detect-form">
+     <form action="?<?php echo $this->js;?>=yes" method="POST" id="detect-form" style="display:none">
         <input type="hidden" name="width" id="width-val" />
         <input type="hidden" name="height" id="height-val" />
         <input type="hidden" name="webkitpoint" id="web-kit-point-val" />
@@ -25,7 +25,7 @@
         };
 
         if ((document.cookie.match('(^|; )<?php echo $this->session_name;?>=([^;]*)') || 0)[2] !== 'running') {
-           form.action = "?<?php echo $this->nocookies;?>";
+           form.action += "&<?php echo $this->cookies;?>=no";
            addField('', 'cookies', false);
         }
 
