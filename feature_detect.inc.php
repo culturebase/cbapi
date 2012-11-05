@@ -7,7 +7,7 @@
     <script type="text/javascript" src="/module/jscript/lib/modernizr/modernizr.js"></script>
   </head>
   <body>
-     <form action="?<?php echo $this->js;?>=yes" method="POST" id="detect-form" style="display:none">
+     <form action="<?php echo $_SERVER['REQUEST_URI'];?>" method="POST" id="detect-form" style="display:none">
         <input type="hidden" name="width" id="width-val" />
         <input type="hidden" name="height" id="height-val" />
         <input type="hidden" name="webkitpoint" id="web-kit-point-val" />
@@ -26,7 +26,6 @@
         };
 
         if ((document.cookie.match('(^|; )<?php echo $this->session_name;?>=([^;]*)') || 0)[2] !== 'running') {
-           form.action += "&<?php echo $this->cookies;?>=no";
            addField('', 'cookies', false);
         }
 
