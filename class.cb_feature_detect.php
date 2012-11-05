@@ -100,7 +100,16 @@ class CbFeatureDetect {
          // nothing is known, run feature detection if expected to be
          // successful.
          setcookie($this->session_name, 'running', 0, '/');
-         require 'feature_detect.inc.php';
+         require 'lib/framework/3rdparty/browscap/Browscap.php';
+         $bc = new Browscap('/var/tmp/browscap/');
+         $browser = $bc->getBrowser();
+         if ($browser->JavaScript) {
+            // JS is probably available, try to run FD.
+            require 'feature_detect.inc.php';
+         } else {
+            // We're pretty sure there is no JS, do an HTTP redirect to ?js=no
+            header('Location: ?js=no');
+         }
          die();
       }
    }
