@@ -3,7 +3,7 @@
   <head>
     <title></title>
     <!-- refresh page after some time to indicate "no JS" -->
-    <noscript><meta http-equiv="Refresh" content="0; URL='?<?php echo $this->js;?>=no'"/></noscript>
+    <meta http-equiv="Refresh" content="5; URL='?<?php echo $this->js;?>=no'"/>
     <script type="text/javascript" src="/module/jscript/lib/modernizr/modernizr.js"></script>
   </head>
   <body>
