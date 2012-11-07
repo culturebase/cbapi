@@ -8,7 +8,7 @@ Cb::import('CbResourceHandlerInterface');
 class CbResourceHandler implements CbResourceHandlerInterface {
 
    private function crash() {
-      throw new CbApiException(502, 'Resource handler must be overriden');
+      throw new CbApiException(503, 'Resource handler must be overriden');
    }
 
    /**

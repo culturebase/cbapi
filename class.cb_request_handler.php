@@ -13,6 +13,6 @@ class CbRequestHandler implements CbRequestHandlerInterface {
     * @return Anything that can be encoded in JSON.
     */
    function handle(array $params) {
-      throw new CbApiException(502, 'Request handler must be overriden');
+      throw new CbApiException(503, 'Request handler must be overriden');
    }
 }
