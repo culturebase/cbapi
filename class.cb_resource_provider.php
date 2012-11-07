@@ -27,7 +27,7 @@ class CbResourceProvider extends CbAbstractProvider {
     * Alternately specify all params except handlers as hash in second parameter
     */
    public function __construct(array $handlers = array(),
-           CbResourceHandlerInterface $default_handler = null,
+           $default_handler = null,
            CbAuthorizationProviderInterface $auth_provider = null,
            string $default_resource = null,
            CbContentFormatter $formatter = null, $cache_timeout = 3600) {
