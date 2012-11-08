@@ -30,20 +30,18 @@ class CbResourceProvider extends CbAbstractProvider {
            $default_handler = null,
            CbAuthorizationProviderInterface $auth_provider = null,
            string $default_resource = null,
-           CbContentFormatter $formatter = null, $cache_timeout = 3600) {
+           CbContentFormatter $formatter = null, $deprecated) {
       if (is_array($default_handler)) {
          $params = array_merge(array(
             'default_handler' => $default_handler['default_handler'] ? null : new CbResourceHandler(),
             'auth_provider' => null,
-            'formatter' => null,
-            'cache_timeout' => 3600
+            'formatter' => null
          ), $default_handler);
       } else {
          $params = array(
             'default_handler' => $default_handler ? $default_handler : new CbResourceHandler(),
             'auth_provider' => $auth_provider,
-            'formatter' => $formatter,
-            'cache_timeout' => $cache_timeout
+            'formatter' => $formatter
          );
       }
       parent::__construct($handlers, $params);
