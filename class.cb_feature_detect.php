@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * MESS. We cannot reliably detect features. Let's admit that.
+ */
 class CbFeatureDetect {
 
    private $session_name;
@@ -77,25 +80,35 @@ class CbFeatureDetect {
    public static function run($session_name = 'features', $js = 'js')
    {
       $fd = new CbFeatureDetect($session_name, $js);
-      return ($_SESSION[$session_name] = $fd->detect());
+      return $fd->detect();
+   }
+
+   private function detectBaseFeatures() {
+      return array(
+         'cookies'    => isset($_COOKIE[$this->session_name]),
+         'javascript' => !isset($_GET[$this->js]) || $_GET[$this->js] === 'yes'
+      );
    }
 
    public function detect()
    {
       if ($_COOKIE[$this->session_name] === 'done') {
          // don't rerun, even if features haven't been saved
-         return $this->features;
+         return array_merge($this->detectBaseFeatures(), $this->features);
       } else if ($_COOKIE[$this->session_name] === 'running' ||
             isset($_GET[$this->js]) || !empty($_POST)) {
          // some information about features is given in request. Evaluate.
-         $this->features = array(
-            'cookies'    => isset($_COOKIE[$this->session_name]),
-            'javascript' => !isset($_GET[$this->js]) || $_GET[$this->js] === 'yes'
-         );
+         $this->features = $this->detectBaseFeatures();
          $this->decodeFeatures();
          setcookie($this->session_name, 'done', 0, '/');
          $_COOKIE[$this->session_name] = 'done';
-         return $this->features;
+         $_SESSION[$this->session_name] = $this->features;
+         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Location: '.$_SERVER['REQUEST_URI']); // obviously submitted by JS
+            die();
+         } else {
+            return $this->features;
+         }
       } else {
          // nothing is known, run feature detection if expected to be
          // successful.
