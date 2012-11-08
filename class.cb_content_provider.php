@@ -24,7 +24,7 @@ class CbContentProvider extends CbAbstractProvider {
     */
    function __construct(array $handlers = array(), $default_handler = null,
          $auth_provider = null, $default_method = null, $formatter = null,
-         $deprecated) {
+         $deprecated = null) {
       if (is_array($default_handler)) {
          $params = array_merge(array(
             'default_handler' => $default_handler['default_handler'] ? null : new CbRequestHandler(),

@@ -30,7 +30,7 @@ class CbResourceProvider extends CbAbstractProvider {
            $default_handler = null,
            CbAuthorizationProviderInterface $auth_provider = null,
            string $default_resource = null,
-           CbContentFormatter $formatter = null, $deprecated) {
+           CbContentFormatter $formatter = null, $deprecated = null) {
       if (is_array($default_handler)) {
          $params = array_merge(array(
             'default_handler' => $default_handler['default_handler'] ? null : new CbResourceHandler(),
