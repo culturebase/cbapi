@@ -1,7 +1,11 @@
 <?php
 
-class CbHtmlFileFormatter extends CbHtmlFormatter {
+class CbHtmlFileFormatter implements CbContentFormatterInterface {
 
+   public function contentType($additional = null) {
+      return "text/html ;charset=utf-8";
+   }
+   
    /**
     * We expect that to be HTML already. For specialized treatment subclass
     * this.

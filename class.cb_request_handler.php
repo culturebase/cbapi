@@ -1,18 +1,8 @@
 <?php
 
-Cb::import('CbRequestHandlerInterface');
+Cb::import("CbRpcHandler");
 
 /**
- * Default request handler. Does not actually do anything.
+ * @deprecated Use CbRpcHandler.
  */
-class CbRequestHandler implements CbRequestHandlerInterface {
-
-   /**
-    * Default Handler throws an error.
-    * @param array $params Parameters for the request.
-    * @return Anything that can be encoded in JSON.
-    */
-   function handle(array $params) {
-      throw new CbApiException(503, 'Request handler must be overriden');
-   }
-}
+class CbRequestHandler extends CbRpcHandler {}

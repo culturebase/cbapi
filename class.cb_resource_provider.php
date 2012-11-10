@@ -10,7 +10,7 @@ Cb::import('CbAbstractProvider', 'InterfaceCbResourceHandler', 'CbResourceHandle
  * selected resource. If no authorization provider is given all actions are
  * allowed.
  *
- * While CbRequestHandler ist descigned to provide an RPC-like interface this is
+ * While CbRpcProvider ist descigned to provide an RPC-like interface this is
  * designed to provide a standard REST interface. Depending on what you want to
  * do you should choose one or the other.
  */

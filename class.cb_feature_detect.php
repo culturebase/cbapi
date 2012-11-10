@@ -118,7 +118,7 @@ class CbFeatureDetect {
          $browser = $bc->getBrowser();
          if ($browser->JavaScript) {
             // JS is probably available, try to run FD.
-            require 'feature_detect.inc.php';
+            require 'templates/feature_detect.inc.php';
          } else {
             // We're pretty sure there is no JS, do an HTTP redirect to ?js=no
             header('Location: ?js=no');

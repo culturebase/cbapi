@@ -12,7 +12,7 @@ class CbJsonFormatter implements CbContentFormatterInterface {
       echo json_encode($content);
    }
 
-   public function contentType() {
-      return "application/json; charset=utf-8";
+   public function contentType($additional = null) {
+      return "application/json";
    }
 }

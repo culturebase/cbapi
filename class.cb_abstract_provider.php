@@ -40,13 +40,15 @@ abstract class CbAbstractProvider {
     * @param array $request Request to be handled. If null, use $_REQUEST instead.
     */
    public function handle(array $request = null) {
-      header('Content-type: ' . $this->formatter->contentType());
+      
 
       if (!$request) $request = array_merge($_COOKIE, $_POST, $_GET);
       $method = isset($request['method']) ? $request['method'] : strtolower($_SERVER['REQUEST_METHOD']);
+      $meta = $this->getMetadata($method, $request);
+      header('Content-type: ' . $this->formatter->contentType(isset($meta['formats']) ? $meta['formats'] : null));
 
       try {
-         if (!$this->cache_provider->run($this->getMetadata($method, $request))) {
+         if (!$this->cache_provider->run($meta)) {
             return;
          }
 

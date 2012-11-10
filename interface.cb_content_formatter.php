@@ -12,5 +12,5 @@ interface CbContentFormatterInterface {
     */
    public function format($content);
 
-   public function contentType();
+   public function contentType($additional = null);
 }
