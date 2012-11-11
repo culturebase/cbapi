@@ -12,14 +12,14 @@ class CbApiException extends Exception {
    protected $headers;   ///< Additional HTTP headers.
    protected $user_data; ///< Data to output in HTTP body.
 
-
    /**
     * Create an API exception.
     * @param string $message Message to be shown to the user.
     * @param int $response_code HTTP response code to be set.
     * @param string|array $headers additional headers to be set (e.g. WWW-Authenticate on 401).
     */
-   public function __construct($response_code = 502, $user_data = "", array $headers = array()) {
+   public function __construct($response_code = 502, $user_data = "", array $headers = array())
+   {
       /* Informational and Success headers are of no use here.
        * Obviously this would indicate a problem in our application logic.
        */
@@ -33,19 +33,22 @@ class CbApiException extends Exception {
     * Return the additional headers.
     * @return array The headers.
     */
-   public function getHeaders() {
+   public function getHeaders()
+   {
       return $this->headers;
    }
 
    /**
     * Output additional HTTP headers and response code header.
     */
-   public function outputHeaders() {
+   public function outputHeaders()
+   {
       foreach($this->getHeaders() as $header) header($header);
       header("HTTP/1.0 ".$this->getCode()." ".$this->getMessage());
    }
 
-   public function getUserData() {
+   public function getUserData()
+   {
       return $this->user_data;
    }
 }

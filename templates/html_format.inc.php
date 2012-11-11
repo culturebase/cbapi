@@ -2,9 +2,10 @@
 <html>
    <head>
       <title><?php $this->title();?></title>
+      <?php $this->javascript(); ?>
    </head>
    <body>
-      <?php $this->content(); ?>
+      <noscript><?php $this->content();?></noscript>
    </body>
 </html>
 

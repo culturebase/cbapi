@@ -4,21 +4,44 @@ Cb::import('CbContentFormatterInterface');
 
 class CbHtmlFormatter implements CbContentFormatterInterface {
 
-   public function contentType($additional = null) {
+   protected $config;
+   protected $name;
+   protected $content;
+
+   public function contentType($additional = null)
+   {
       return "text/html ;charset=utf-8";
    }
 
-   private function title() {
+   private function javascript()
+   {
+      $js = $this->config['progressive_enhancement'];
+      if (is_string($js)) $js = array($js);
+      if (is_array($js)) {
+         foreach($js as $script) {
+            echo "<script type='text/javascript' src='$script'></script>";
+         }
+      }
+   }
+
+   private function title()
+   {
       echo htmlentities($this->name);
    }
-   
-   private function content($content = null, $level = 1) {
+
+   private function content($content = null, $level = 1)
+   {
       if ($content === null) $content = $this->content;
       if (!is_array($content)) {
+         if ($content === false) {
+            $content = 'false';
+         } else if ($content === true) {
+            $content = 'true';
+         }
          echo "<div>".htmlentities($content)."</div>";
       } else {
          foreach($content as $key => $val) {
-            if ($val !== null) {
+            if ($val !== null && $val !== '') {
                if (!is_int($key)) {
                   if ($level < 7) {
                      echo "<h$level>".htmlentities($key)."</h$level>";
@@ -31,10 +54,16 @@ class CbHtmlFormatter implements CbContentFormatterInterface {
          }
       }
    }
-   
-   public function format($content, $name = '') {
+
+   public function format($name, $content)
+   {
       $this->name = $name;
       $this->content = $content;
       require 'templates/html_format.inc.php';
+   }
+
+   public function __construct($config)
+   {
+      $this->config = $config;
    }
 }

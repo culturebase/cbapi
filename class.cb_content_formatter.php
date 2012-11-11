@@ -2,33 +2,49 @@
 
 require_once 'HTTP.php';
 
-/**
- * Default formatter creates JSON.
- */
 class CbContentFormatter implements CbContentFormatterInterface {
-   protected $types = array(
+   protected $name;
+   protected $config;
+   protected $default_format = 'text/html';
+
+   protected $formats = array(
          'application/json'      => 'CbJsonFormatter',
          'text/html'             => 'CbHtmlFormatter',
          'application/xhtml+xml' => 'CbXhtmlFormatter',
          'application/xml'       => 'CbXmlFormatter',
          'text/plain'            => 'CbPlainFormatter'
    );
-   
+
    protected $selected = null;
-   
-   public function contentType($additional = null) {
-      if ($additional !== null) {
-         $this->types = array_merge($this->types, $additional);
+
+   public function contentType($additional = null)
+   {
+      if (is_array($additional)) {
+         $this->formats = array_merge($this->formats, $additional);
       }
-      $type = $this->types[HTTP::negotiateMimeType(array_keys($this->types), 'application/json')];
-      $class = new ReflectionClass($type);
-      $this->selected = $class->newInstance();
+      $this->selected = $this->formats[HTTP::negotiateMimeType(array_keys($this->formats), $this->default_format)];
+      if (is_string($this->selected)) {
+         $class = new ReflectionClass($this->selected);
+         $this->selected = $class->newInstance($this->config);
+      }
       return $this->selected->contentType(); // may add charset info
    }
 
-   public function format($content) {
+   public function format($name, $content)
+   {
       if ($this->selected === null) throw new CbApiException(500,
             "You have to negotiate a content type before formatting the content.");
-      echo $this->selected->format($content);
+      echo $this->selected->format($name, $content);
+   }
+
+   public function __construct($config)
+   {
+      $this->config = $config;
+      if (isset($config['default_format'])) {
+         $this->default_format = $config['default_format'];
+      }
+      if (is_array($config['formats'])) {
+         $this->formats = array_merge($this->formats, $config['formats']);
+      }
    }
 }

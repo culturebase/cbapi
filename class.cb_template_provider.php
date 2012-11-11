@@ -15,11 +15,9 @@ class CbTemplateProvider extends CbAbstractProvider {
     * @param array $templates Mapping of name => path for templates.
     * @param string $default_template Template to be used if none is given.
     */
-   public function __construct(array $templates = array(), $default_template = null) {
-      $params = array(
-         'formatter' => new CbHtmlFileFormatter(),
-      );
-      parent::__construct(array(), $params);
+   public function __construct(array $templates = array(), $default_template = null)
+   {
+      parent::__construct(array());
       $this->default_template = $default_template;
       $this->templates = $templates;
    }
@@ -29,7 +27,8 @@ class CbTemplateProvider extends CbAbstractProvider {
       return isset($request['template']) ? $this->templates[$request['template']] : $this->default_template;
    }
 
-   protected function execHandler($method, $request) {
+   protected function execHandler($method, $request)
+   {
       if ($method !== 'get') {
          throw new CbApiException(403, 'You cannot modify templates.');
       }
@@ -43,7 +42,11 @@ class CbTemplateProvider extends CbAbstractProvider {
       }
       return array(
          'last_modified' => filemtime($this->resolveTemplate($request)),
-         'privacy' => 'public'
+         'privacy' => 'public',
+         'name' => $request['template'],
+         'formats' => array(
+            'text/html' => 'CbHtmlFileFormatter'
+         )
       );
    }
 }

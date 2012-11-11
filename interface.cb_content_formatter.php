@@ -7,10 +7,10 @@
 interface CbContentFormatterInterface {
 
    /**
+    * @param $name Name of Resource or Method being handled.
     * @param $content Content to be formatted.
-    * @return String to be output.
     */
-   public function format($content);
+   public function format($name, $content);
 
    public function contentType($additional = null);
 }

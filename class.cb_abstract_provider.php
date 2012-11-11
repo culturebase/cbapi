@@ -15,22 +15,43 @@ abstract class CbAbstractProvider {
    protected $default_handler; ///< Handler to be called if no specific handler is given.
    protected $formatter;       ///< Formatter for the output.
    protected $cache_provider;  ///< Timout for the HTTP cache.
+   protected $config;          ///< Application configuration.
+
+   protected function instantiate($thing)
+   {
+      if (is_string($thing)) {
+         $class = new ReflectionClass($thing);
+         $thing = $class->newInstance($this->config);
+      }
+      return $thing;
+   }
+
+   protected function getHandler($key)
+   {
+      if (isset($this->handlers[$key])) {
+         return ($this->handlers[$key] = $this->instantiate($this->handlers[$key]));
+      } else {
+         return ($this->default_handler = $this->instantiate($this->default_handler));
+      }
+   }
 
    /**
     * Create an abstract provider.
     * @param array $handlers Handlers for various methods.
-    * @param $default_handler Handler to be called for unspecified methods.
-    * @param CbAuthorizationProvider $auth_provider Authorization provider. If null anything is allowed.
-    * @param CbContentFormatter $formatter Content formatter for the output.
+    * @param array $config Application Configuration.
     */
-   protected function __construct(array $handlers = array(), $params = array()) {
-      $this->cache_provider = $params['cache_provider'] ?
-            $params['cache_provider'] : new CbCacheProvider();
-      $this->auth_provider = $params['auth_provider'];
+   protected function __construct(array $handlers = array(), $config = array())
+   {
+      $this->config = $config;
+      $this->cache_provider = $config['cache_provider'] ?
+            $this->instantiate($config['cache_provider']) :
+            new CbCacheProvider($config);
+      $this->auth_provider = $this->instantiate($config['auth_provider']);
       $this->handlers = $handlers;
-      $this->default_handler = $params['default_handler'];
-      $this->formatter = $params['formatter'] ?
-            $params['formatter'] : new CbContentFormatter();
+      $this->default_handler = $config['default_handler'];
+      $this->formatter = $config['formatter'] ?
+            $this->instantiate($config['formatter']) :
+            new CbContentFormatter($config);
    }
 
    /**
@@ -39,29 +60,25 @@ abstract class CbAbstractProvider {
     * finally output the error message or the result.
     * @param array $request Request to be handled. If null, use $_REQUEST instead.
     */
-   public function handle(array $request = null) {
-      
-
+   public function handle(array $request = null)
+   {
       if (!$request) $request = array_merge($_COOKIE, $_POST, $_GET);
       $method = isset($request['method']) ? $request['method'] : strtolower($_SERVER['REQUEST_METHOD']);
       $meta = $this->getMetadata($method, $request);
       header('Content-type: ' . $this->formatter->contentType(isset($meta['formats']) ? $meta['formats'] : null));
 
       try {
-         if (!$this->cache_provider->run($meta)) {
-            return;
-         }
+         if (!$this->cache_provider->run($meta)) return;
 
          if ($this->auth_provider) CbSession::start();
 
          /* allow inline HTTP login; as we provide 401 we should do this. */
          if (isset($_SERVER['PHP_AUTH_USER']) && (!isset($_SESSION['auth']) ||
                  !isset($_SESSION['auth']['isAuthenticated']) ||
-                 $_SESSION['auth']['account'] != $_SERVER['PHP_AUTH_USER'])) {
+                 $_SESSION['auth']['account'] !== $_SERVER['PHP_AUTH_USER'])) {
             CbAuth::login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
          }
 
-         // TODO: there is a standard for providing the HTTP method via POST or GET.
          if ($this->auth_provider) $this->auth_provider->assert($method, $request);
          $result = $this->execHandler($method, $request);
       } catch (CbApiException $e) {
@@ -69,7 +86,7 @@ abstract class CbAbstractProvider {
          $result = $e->getUserData();
       }
       try {
-         $this->formatter->format($result);
+         $this->formatter->format(isset($meta['name']) ? $meta['name'] : '', $result);
       } catch (CbApiException $e) {
          $e->outputHeaders();
          echo "fatal error during output formatting: ".$e->getUserData();

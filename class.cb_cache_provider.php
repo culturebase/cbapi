@@ -1,7 +1,10 @@
 <?php
 
 class CbCacheProvider {
-   private function condition_fails($only_412 = false, $only_304 = false) {
+   public function __construct() {}
+
+   private function condition_fails($only_412 = false, $only_304 = false)
+   {
       if (!$only_412 && in_array($_SERVER['REQUEST_METHOD'], array('GET', 'HEAD'))) {
          header('Not Modified', true, 304);
       } else if (!$only_304) {
@@ -17,7 +20,8 @@ class CbCacheProvider {
     * suspect some of our applications are depending on it. So we cannot just
     * set session.cache_limiter to '' in the config.
     */
-   private function sendHeaders() {
+   private function sendHeaders()
+   {
       $future = gmdate("D, d M Y H:i:s T", time() + session_cache_expire() * 60);
       $interval = session_cache_expire() * 60;
       switch (session_cache_limiter()) {
@@ -53,7 +57,8 @@ class CbCacheProvider {
     *   Etag.
     * @return type true if content is necessary, false otherwise
     */
-   public function run($meta = array()) {
+   public function run($meta = array())
+   {
       $content = true;
       if (isset($meta['max_age'])) {
          if (!isset($meta['privacy'])) $meta['privacy'] = 'private';

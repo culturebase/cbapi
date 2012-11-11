@@ -6,6 +6,7 @@ Cb::import('CbResourceHandlerInterface');
  * Default request handler. Does not actually do anything.
  */
 class CbResourceHandler implements CbResourceHandlerInterface {
+   public function __construct() {}
 
    private function crash() {
       throw new CbApiException(503, 'Resource handler must be overriden');

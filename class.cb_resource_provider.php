@@ -20,37 +20,36 @@ class CbResourceProvider extends CbAbstractProvider {
    /**
     * Create a content provider.
     * @param array $handlers Handlers for various methods.
-    * @param CbResourceHandler $default_handler Handler to be called for unspecified methods.
-    * @param CbAuthorizationProvider $auth_provider Authorization provider. If null anything is allowed.
-    * @param string $default_resource Default resource to be used if none is specified.
-    * @param CbContentFormatter $formatter Content formatter for the output.
-    * Alternately specify all params except handlers as hash in second parameter
+    * @param array $config Application Configuration.
+    * @param @deprecated CbAuthorizationProvider $auth_provider Authorization Provider to be used.
+    * @param @deprecated string $default_resource Default resource to be used if none is specified.
+    * @param @deprecated CbContentFormatter $formatter Content formatter for the output.
+    * @param @deprecated number $deprecated Ignored.
     */
-   public function __construct(array $handlers = array(),
-           $default_handler = null,
-           CbAuthorizationProviderInterface $auth_provider = null,
-           string $default_resource = null,
-           CbContentFormatter $formatter = null, $deprecated = null) {
-      if (is_array($default_handler)) {
-         $params = array_merge(array(
-            'default_handler' => $default_handler['default_handler'] ? null : new CbResourceHandler(),
+   public function __construct(array $handlers = array(), $config = null,
+         $auth_provider = null, string $default_resource = null,
+         CbContentFormatter $formatter = null, $deprecated = null) {
+      if (is_array($config)) {
+         $config = array_merge(array(
+            'default_handler' => $config['default_handler'] ? null : 'CbResourceHandler',
             'auth_provider' => null,
             'formatter' => null
-         ), $default_handler);
+         ), $config);
       } else {
-         $params = array(
-            'default_handler' => $default_handler ? $default_handler : new CbResourceHandler(),
+         $config = array(
+            'default_handler' => $config ? $config : 'CbResourceHandler',
             'auth_provider' => $auth_provider,
             'formatter' => $formatter
          );
       }
-      parent::__construct($handlers, $params);
-      $this->default_resource = $default_resource;
+      parent::__construct($handlers, $config);
+      $this->default_resource = isset($config['default_resource']) ?
+         $config['default_resource'] : $default_resource;
    }
 
    private function resolveHandler($request) {
       $resource = isset($request['resource']) ? $request['resource'] : $this->default_resource;
-      return isset($this->handlers[$resource]) ? $this->handlers[$resource] : $this->default_handler;
+      return $this->getHandler($resource);
    }
 
    protected function execHandler($method, $request) {
@@ -71,8 +70,11 @@ class CbResourceProvider extends CbAbstractProvider {
    protected function getMetadata($method, $request)
    {
       $handler = $this->resolveHandler($request);
-      return (method_exists($handler, 'meta') ?
-            $handler->meta($method, $request) :
-            array());
+      $meta = array('name' => $request['resource']);
+      if (method_exists($handler, 'meta')) {
+         return array_merge($meta, $handler->meta($method, $request));
+      } else {
+         return $meta;
+      }
    }
 }

@@ -4,6 +4,7 @@
  * Map a set of parameters to an ACL resource.
  */
 class CbResourceMapper {
+   public function __construct() {}
 
    /**
     * By default return the parameter 'resource' or an empty string.

@@ -1,18 +1,25 @@
 <?php
 
+/**
+ * Render a content-less HTML file. This is intended for "dumb" templates to be
+ * used by Javascript user interfaces. The goal is to get allow for very
+ * aggressive caching by not allowing any content in the HTML.
+ */
 class CbHtmlFileFormatter implements CbContentFormatterInterface {
+   public function __construct() {}
 
-   public function contentType($additional = null) {
+   public function contentType($additional = null)
+   {
       return "text/html ;charset=utf-8";
    }
-   
+
    /**
     * We expect that to be HTML already. For specialized treatment subclass
     * this.
     * @param $content Content to be formatted.
     * @return String to be output.
     */
-   public function format($content)
+   public function format($name, $content)
    {
       if ($content === null) return;
       if (is_string($content)) {

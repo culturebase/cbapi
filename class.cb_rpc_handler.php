@@ -6,6 +6,7 @@ Cb::import('CbRpcHandlerInterface');
  * Default RPC handler. Does not actually do anything.
  */
 class CbRpcHandler implements CbRpcHandlerInterface {
+   public function __construct() {}
 
    /**
     * Default Handler throws an error.

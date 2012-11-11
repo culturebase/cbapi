@@ -16,35 +16,36 @@ class CbRpcProvider extends CbAbstractProvider {
    /**
     * Create a content provider.
     * @param array $handlers Handlers for various methods.
-    * @param CbRpcHandler $default_handler Handler to be called for unspecified methods.
-    * @param CbAuthorizationProvider $auth_provider Authorization provider. If null anything is allowed.
-    * @param string $default_method Default method to be called if none is specified.
-    * @param CbContentFormatter $formatter Content formatter for the output.
-    * Alternately specify all params except handlers as hash in second parameter.
+    * @param array $config Application Configuration.
+    * @param @deprecated CbAuthorizationProvider $auth_provider Authorization Provider.
+    * @param @deprecated string $default_method Default method to be called if none is specified.
+    * @param @deprecated CbContentFormatter $formatter Content formatter for the output.
+    * @param @deprecated number $deprecated Ignored.
     */
-   function __construct(array $handlers = array(), $default_handler = null,
+   function __construct(array $handlers = array(), $config = null,
          $auth_provider = null, $default_method = null, $formatter = null,
          $deprecated = null) {
-      if (is_array($default_handler)) {
-         $params = array_merge(array(
-            'default_handler' => $default_handler['default_handler'] ? null : new CbRpcHandler(),
+      if (is_array($config)) {
+         $config = array_merge(array(
+            'default_handler' => $config['default_handler'] ?
+                  null : 'CbRpcHandler',
             'auth_provider' => null,
             'formatter' => null
-         ), $default_handler);
+         ), $config);
       } else {
-         $params = array(
-            'default_handler' => $default_handler,
+         $config = array(
+            'default_handler' => $config,
             'auth_provider' => $auth_provider,
             'formatter' => $formatter
          );
       }
-      parent::__construct($handlers, $params);
-      $this->default_method = $default_method;
+      parent::__construct($handlers, $config);
+      $this->default_method = isset($config['default_method']) ?
+            $config['default_method'] : $default_method;
    }
 
    protected function execHandler($method, $request) {
-      $handler = isset($this->handlers[$method]) ? $this->handlers[$method] : $this->default_handler;
-      return $handler->handle($request);
+      return $this->getHandler($method)->handle($request);
    }
 
    /**
@@ -63,9 +64,12 @@ class CbRpcProvider extends CbAbstractProvider {
 
    protected function getMetadata($method, $request)
    {
-      $handler = isset($this->handlers[$method]) ? $this->handlers[$method] : $this->default_handler;
-      return (method_exists($handler, 'meta') ?
-            $handler->meta($request) :
-            array());
+      $handler = $this->getHandler($method);
+      $meta = array('name' => $method);
+      if (method_exists($handler, 'meta')) {
+         return array_merge($meta, $handler->meta($request));
+      } else {
+         return $meta;
+      }
    }
 }

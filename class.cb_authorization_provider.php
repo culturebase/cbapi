@@ -8,23 +8,36 @@ Cb::import('CbAuthorizationProviderInterface', 'CbResourceMapper', 'CbApiExcepti
  */
 class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
 
-   protected $application;             ///< Application context for ACLS.
-   protected $resource_mapping;        ///< Mappers for getting resources from parameters.
-   protected $action_mapping;          ///< Mapping of method => action.
-   protected $default_resource_mapper; ///< Resource mapper to be used if none is given.
+   protected $application;      ///< Application context for ACLS.
+   protected $resource_mapping; ///< Mappers for getting resources from parameters.
+   protected $action_mapping;   ///< Mapping of method => action.
+   protected $resource_mapper;  ///< Resource mapper to be used if none is given.
 
    /**
     * Create an authorization provider.
-    * @param string $application Application context for ACLs.
-    * @param array $action_mapping Mapping of methods to actions.
-    * @param array $resource_mapping Resource mappers for mapping parameters to resources.
-    * @param ICbResourceMapper $default_mapper Default resource mapper.
+    * @param array $config Application Configuration.
+    * @param @deprecated array $action_mapping Mapping of methods to actions.
+    * @param @deprecated array $resource_mapping Resource mappers for mapping parameters to resources.
+    * @param @deprecated CbResourceMapper $resource_mapper Default resource mapper.
     */
-   function __construct($application, array $action_mapping = array(), array $resource_mapping = array(), CbResourceMapper $default_mapper = null) {
-      $this->application = $application;
-      $this->resource_mapping = $resource_mapping;
-      $this->action_mapping = $action_mapping;
-      $this->default_resource_mapper = $default_mapper ? $default_mapper : new CbResourceMapper();
+   function __construct($config, array $action_mapping = array(),
+         array $resource_mapping = array(),
+         CbResourceMapper $resource_mapper = null)
+   {
+      if (!is_array($config)) {
+         $config = array(
+            'application' => $config,
+            'resource_mapping' => $resource_mapping,
+            'action_mapping' => $action_mapping,
+            'resource_mapper' => $resource_mapper
+         );
+      }
+      $this->config = $config;
+      $this->application = $config['application'];
+      $this->resource_mapping = $config['resource_mapping'];
+      $this->action_mapping = $config['action_mapping'];
+      $this->resource_mapper = $config['resource_mapper'] ?
+            $config['resource_mapper'] : 'CbResourceMapper';
    }
 
    /**
@@ -33,11 +46,21 @@ class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
     * @param string $method Method to be executed.
     * @param array $params Parameters for the method.
     */
-   function assert($method, array $params) {
-      $action = $this->action_mapping[$method];
+   function assert($method, array $params)
+   {
+      if (isset($this->action_mapping)) {
+         $action = $this->action_mapping[$method];
+      }
       if (!$action) $action = $method;
-      $resource_mapper = $this->resource_mapping[$action];
-      if (!$resource_mapper) $resource_mapper = $this->default_resource_mapper;
+
+      if (isset($this->resource_mapping)) {
+         $resource_mapper = $this->resource_mapping[$action];
+      }
+      if (!$resource_mapper) $resource_mapper = $this->resource_mapper;
+      if (is_string($resource_mapper)) {
+         $class = new ReflectionClass($resource_mapper);
+         $resource_mapper = $class->newInstance($this->config);
+      }
       $resource = $resource_mapper->get($params);
 
       $account = null;
