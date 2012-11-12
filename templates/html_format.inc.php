@@ -5,7 +5,11 @@
       <?php $this->javascript(); ?>
    </head>
    <body>
-      <noscript><?php $this->content();?></noscript>
+      <?php
+         if (!$this->debug()) echo '<noscript>';
+         $this->content();
+         if (!$this->debug()) echo '</noscript>';
+      ?>
    </body>
 </html>
 

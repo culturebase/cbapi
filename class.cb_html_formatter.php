@@ -29,6 +29,11 @@ class CbHtmlFormatter implements CbContentFormatterInterface {
       echo htmlentities($this->name);
    }
 
+   private function debug()
+   {
+      return isset($this->config['debug']) && $this->config['debug'] === true;
+   }
+
    private function content($content = null, $level = 1)
    {
       if ($content === null) $content = $this->content;
