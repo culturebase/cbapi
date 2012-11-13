@@ -13,7 +13,7 @@ class CbFeatureDetect {
    {
       $this->session_name = $session_name;
       $this->js = $js;
-      $this->features = array_key_exists($session_name, $_SESSION) ?
+      $this->features = (array_key_exists($session_name, $_SESSION) && is_array($_SESSION[$session_name])) ?
             $_SESSION[$session_name] : array();
    }
 
