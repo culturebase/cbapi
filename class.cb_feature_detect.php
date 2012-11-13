@@ -94,7 +94,6 @@ class CbFeatureDetect {
    {
       if ($_COOKIE[$this->session_name] === 'done') {
          // don't rerun, even if features haven't been saved
-         die(var_dump($this->features));
          return array_merge($this->detectBaseFeatures(), $this->features);
       } else if ($_COOKIE[$this->session_name] === 'running' ||
             isset($_GET[$this->js]) || !empty($_POST)) {
