@@ -15,7 +15,7 @@ class CbHtmlFormatter implements CbContentFormatterInterface {
 
    private function javascript()
    {
-      $js = $this->config['progressive_enhancement'];
+      $js = $this->config['bootstrap_javascript'];
       if (is_string($js)) $js = array($js);
       if (is_array($js)) {
          foreach($js as $script) {
@@ -36,7 +36,7 @@ class CbHtmlFormatter implements CbContentFormatterInterface {
 
    private function content($content = null, $level = 1)
    {
-      if ($content === null) $content = $this->content;
+      if ($content === null) $content = $this->content->get();
       if (!is_array($content)) {
          if ($content === false) {
             $content = 'false';
@@ -63,7 +63,7 @@ class CbHtmlFormatter implements CbContentFormatterInterface {
    public function format($name, $content)
    {
       $this->name = $name;
-      $this->content = $content->get();
+      $this->content = $content;
       require 'templates/html_format.inc.php';
    }
 
