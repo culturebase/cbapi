@@ -1,6 +1,6 @@
 <?php
 
-Cb::import('CbAbstractProvider', 'InterfaceCbResourceHandler', 'CbResourceHandler');
+Cb::import('CbAbstractProvider', 'CbResourceHandlerInterface', 'CbResourceHandler', 'CbContentAdapter');
 
 /**
  * Resource providers handle AJAX requests (or any other requests) by clients,
@@ -55,7 +55,8 @@ class CbResourceProvider extends CbAbstractProvider {
    protected function execHandler($method, $request) {
       // TODO: throw a proper exception if method doesn't exist (and things like
       //       __call aren't implemented either).
-      return $this->resolveHandler($request)->$method($request);
+      $unsafe = in_array($method, array('delete', 'put', 'post'));
+      return new CbContentAdapter($this->resolveHandler($request), $method, $request, $unsafe);
    }
 
    public function handle(array $request = null) {

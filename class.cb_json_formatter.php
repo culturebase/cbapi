@@ -11,7 +11,7 @@ class CbJsonFormatter implements CbContentFormatterInterface {
     * @return String to be output.
     */
    public function format($name, $content) {
-      echo json_encode($content);
+      echo json_encode($content->get());
    }
 
    public function contentType($additional = null) {

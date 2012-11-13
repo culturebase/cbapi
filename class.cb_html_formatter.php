@@ -63,7 +63,7 @@ class CbHtmlFormatter implements CbContentFormatterInterface {
    public function format($name, $content)
    {
       $this->name = $name;
-      $this->content = $content;
+      $this->content = $content->get();
       require 'templates/html_format.inc.php';
    }
 

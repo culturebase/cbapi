@@ -83,7 +83,7 @@ abstract class CbAbstractProvider {
          $result = $this->execHandler($method, $request);
       } catch (CbApiException $e) {
          $e->outputHeaders();
-         $result = $e->getUserData();
+         $result = new CbContentAdapter($e->getUserData());
       }
       try {
          $this->formatter->format(isset($meta['name']) ? $meta['name'] : '', $result);

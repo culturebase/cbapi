@@ -1,6 +1,6 @@
 <?php
 
-Cb::import('CbAbstractProvider', 'CbRpcHandler');
+Cb::import('CbAbstractProvider', 'CbRpcHandler', 'CbContentAdapter');
 
 /**
  * Content providers handle AJAX requests (or any other requests) by clients,
@@ -45,7 +45,8 @@ class CbRpcProvider extends CbAbstractProvider {
    }
 
    protected function execHandler($method, $request) {
-      return $this->getHandler($method)->handle($request);
+      return new CbContentAdapter($this->getHandler($method), "handle", $request,
+            in_array(strtolower($_SERVER['REQUEST_METHOD']), array('put', 'post', 'delete')));
    }
 
    /**

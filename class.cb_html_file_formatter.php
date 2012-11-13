@@ -21,6 +21,7 @@ class CbHtmlFileFormatter implements CbContentFormatterInterface {
     */
    public function format($name, $content)
    {
+      $content = $content->get();
       if ($content === null) return;
       if (is_string($content)) {
          require $content;

@@ -32,7 +32,7 @@ class CbTemplateProvider extends CbAbstractProvider {
       if ($method !== 'get') {
          throw new CbApiException(403, 'You cannot modify templates.');
       }
-      return $this->resolveTemplate($request);
+      return new CbContentAdapter($this->resolveTemplate($request));
    }
 
    protected function getMetadata($method, $request)

@@ -30,11 +30,11 @@ class CbContentFormatter implements CbContentFormatterInterface {
       return $this->selected->contentType(); // may add charset info
    }
 
-   public function format($name, $content)
+   public function format($name, $content_adapter)
    {
       if ($this->selected === null) throw new CbApiException(500,
             "You have to negotiate a content type before formatting the content.");
-      echo $this->selected->format($name, $content);
+      echo $this->selected->format($name, $content_adapter);
    }
 
    public function __construct($config)
