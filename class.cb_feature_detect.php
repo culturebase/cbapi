@@ -119,11 +119,16 @@ class CbFeatureDetect {
          if ($browser->JavaScript) {
             // JS is probably available, try to run FD.
             require 'templates/feature_detect.inc.php';
+            die();
          } else {
-            // We're pretty sure there is no JS, do an HTTP redirect to ?js=no
-            header('Location: ?js=no');
+            setcookie($this->session_name, 'done', 0, '/');
+            $_COOKIE[$this->session_name] = 'done';
+            $this->features = array(
+               'javascript' => false,
+               'cookies'    => $browser->Cookies
+            );
+            return $this->features;
          }
-         die();
       }
    }
 
