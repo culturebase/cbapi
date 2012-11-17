@@ -1,5 +1,7 @@
 <?php
 
+Cb::import("CbHtmlFormatter");
+
 /**
  * HTML formatter that doesn't include any content. This is useful for pages
  * which shall be completely created by Javascript. You can set a cookie in the
