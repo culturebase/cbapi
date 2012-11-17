@@ -65,6 +65,14 @@ abstract class CbAbstractProvider {
       if (!$request) $request = array_merge($_COOKIE, $_POST, $_GET);
       $method = isset($request['method']) ? $request['method'] : strtolower($_SERVER['REQUEST_METHOD']);
       $meta = $this->getMetadata($method, $request);
+      if (isset($meta['vary'])) {
+         $vary = array_map("ucfirst", array_map("strtolower",
+               is_array($meta['vary']) ? $meta['vary'] : array($meta['vary'])));
+         if (!in_array("Accept", $vary)) $vary[] = 'Accept';
+         header('Vary: '. implode(',', $vary), false);
+      } else {
+         header('Vary: Accept', false);
+      }
       header('Content-type: ' . $this->formatter->contentType(isset($meta['formats']) ? $meta['formats'] : null));
 
       try {
