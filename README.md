@@ -25,16 +25,16 @@ formatting:
 handler from the ones you specify by examining the "resource" property of the
 previously parsed request URI. It then executes a method corresponding to the
 HTTP request method on that handler if
-a, the authorization provider allows it and
-b, the cache provider doesn't tell it to deliver no content and
-c, if the formatter actually requests the data or the HTTP method is unsafe.
+ * the authorization provider allows it and
+ * the cache provider doesn't tell it to deliver no content and
+ * the chosen formatter actually requests the data or the HTTP method is unsafe.
 
 2. CbRpcProvider works roughly like CbResourceProvider, but selects its handlers
 by a "method" property which can be given via either URI, POST, GET or COOKIE
 parameters. It doesn't need a "resource" property and doesn't care about HTTP
 request methods. This class can be chosen if you're implementing an application
 which needs a serverside state. For example, a user registration may need to
-associate different Requests with each other and certain methods are allowed to
+associate different requests with each other and certain methods are allowed to
 be called only in the context constructed by certain previous method calls.
 
 3. CbTemplateProvider is meant to deliver easily cacheable templates for CbUi
@@ -50,7 +50,7 @@ methods. Alternately you can implement CbRpcHandlerInterface for RPC interfaces.
 There you only have one method "handle". You should return something that can
 be used by all available formatters from this method. It's advisable to return
 a nested array. You can serialize a Propel object hierarchy into a nested array
-with CbSerialize
+with CbSerialize.
 
 Also you can and should implement a method "meta" which will inform the provider
 about various properties of the resource or method being interacted with.
