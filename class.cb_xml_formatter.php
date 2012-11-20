@@ -14,7 +14,11 @@ class CbXmlFormatter implements CbContentFormatterInterface {
    private function content($xml, $content)
    {
       if (!is_array($content)) {
-         $xml->addAttribute($content, null);
+         if (is_string($content)) {
+            $xml->addAttribute($content, null);
+         } else {
+            $xml->addAttribute('value', $content);
+         }
       } else {
          foreach($content as $key => $val) {
             if ($val !== null && $val !== '') {
