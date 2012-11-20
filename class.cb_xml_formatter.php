@@ -14,25 +14,13 @@ class CbXmlFormatter implements CbContentFormatterInterface {
    private function content($xml, $content)
    {
       if (!is_array($content)) {
-         if (is_string($content)) {
-            $xml->addAttribute($content, null);
-         } else {
-            $xml->addAttribute('value', $content);
-         }
+         $xml->addAttribute('value', $content);
       } else {
          foreach($content as $key => $val) {
             if ($val !== null && $val !== '') {
-               if (is_array($val)) {
-                  if (is_int($key)) {
-                     $this->content($xml->addChild('item'), $val);
-                  } else {
-                     $this->content($xml->addChild($key), $val);
-                  }
-               } else if (!is_int($key)) {
-                  $xml->addAttribute($key, $val);
-               } else {
-                  $xml->addAttribute($val, null);
-               }
+               $child = $xml->addChild('item');
+               if (!is_int($key)) $child->addAttribute('name', $key);
+               $this->content($child, $val);
             }
          }
       }
@@ -41,8 +29,9 @@ class CbXmlFormatter implements CbContentFormatterInterface {
    public function format($name, $content)
    {
       $xml = new SimpleXMLElement("<root/>");
-      $this->content($xml->addChild($name), $content->get());
-      echo $xml->children()->asXML();
+      $xml->addAttribute('name', $name);
+      $this->content($xml, $content->get());
+      echo $xml->asXML();
    }
 
    public function __construct($config)
