@@ -14,7 +14,7 @@ class CbJsonFormatter implements CbContentFormatterInterface {
       echo json_encode($content->get());
    }
 
-   public function contentType($additional = null) {
+   public function contentType() {
       return "application/json";
    }
 }

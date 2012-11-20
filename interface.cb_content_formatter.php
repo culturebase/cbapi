@@ -12,5 +12,14 @@ interface CbContentFormatterInterface {
     */
    public function format($name, $content);
 
-   public function contentType($additional = null);
+   /**
+    * Return the content type this formatter will produce.
+    */
+   public function contentType();
+
+   /**
+    * If supported, also implement a negotiate($additional, $override) method
+    * to figure out the content type.
+    * @see CbContentFormatter
+    */
 }

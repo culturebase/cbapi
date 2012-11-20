@@ -8,7 +8,7 @@ class CbHtmlFormatter implements CbContentFormatterInterface {
    protected $name;
    protected $content;
 
-   public function contentType($additional = null)
+   public function contentType()
    {
       return "text/html ;charset=utf-8";
    }

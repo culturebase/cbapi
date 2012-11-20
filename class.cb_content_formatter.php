@@ -15,26 +15,56 @@ class CbContentFormatter implements CbContentFormatterInterface {
          'text/plain'            => 'CbPlainFormatter'
    );
 
-   protected $selected = null;
+   /**
+    * Shorthand notation for format overrides as part of URL.
+    * @var type
+    */
+   protected $format_abbrevs = array(
+         'json'  => 'application/json',
+         'html'  => 'text/html',
+         'xhtml' => 'application/xhtml+xml',
+         'xml'   => 'application/xml',
+         'txt'   => 'text/plain'
+   );
 
-   public function contentType($additional = null)
+   public function contentType()
+   {
+      throw new CbApiException(500,
+            "You cannot request the content type from the meta formatter.");
+   }
+
+   /**
+    * Negotiate the content type.
+    * @param array $additional Additional or different formatters to be used.
+    * @param string $override If set force the given format, even if content
+    *                         negotiation would choose something else. You can
+    *                         give a shorthand format specifier here.
+    * @return CbContentFormatterInterface The chosen formatter.
+    */
+   public function negotiate($additional = null, $override = null)
    {
       if (is_array($additional)) {
          $this->formats = array_merge($this->formats, $additional);
       }
-      $this->selected = $this->formats[HTTP::negotiateMimeType(array_keys($this->formats), $this->default_format)];
-      if (is_string($this->selected)) {
-         $class = new ReflectionClass($this->selected);
-         $this->selected = $class->newInstance($this->config);
+      if (isset($this->format_abbrevs[$override])) {
+         $selected = $this->formats[$this->format_abbrevs[$override]];
+      } else if (isset($this->formats[$override])) {
+         $selected = $this->formats[$override];
+      } else {
+         $selected = $this->formats[HTTP::negotiateMimeType(
+               array_keys($this->formats), $this->default_format)];
       }
-      return $this->selected->contentType(); // may add charset info
+      if (is_string($selected)) {
+         $class = new ReflectionClass($selected);
+         $selected = $class->newInstance($this->config);
+      }
+      return $selected;
    }
 
    public function format($name, $content_adapter)
    {
-      if ($this->selected === null) throw new CbApiException(500,
-            "You have to negotiate a content type before formatting the content.");
-      echo $this->selected->format($name, $content_adapter);
+      throw new CbApiException(500,
+            "You cannot use the meta formatter for actual formatting.");
    }
 
    public function __construct($config)

@@ -8,7 +8,7 @@
 class CbHtmlFileFormatter implements CbContentFormatterInterface {
    public function __construct() {}
 
-   public function contentType($additional = null)
+   public function contentType()
    {
       return "text/html ;charset=utf-8";
    }

@@ -73,7 +73,15 @@ abstract class CbAbstractProvider {
       } else {
          header('Vary: Accept', false);
       }
-      header('Content-type: ' . $this->formatter->contentType(isset($meta['formats']) ? $meta['formats'] : null));
+      if (method_exists($this->formatter, 'negotiate')) {
+         $formatter = $this->formatter->negotiate(
+               isset($meta['formats']) ? $meta['formats'] : null,
+               isset($request['format']) ? $request['format'] : null
+         );
+      } else {
+         $formatter = $this->formatter;
+      }
+      header('Content-type: ' . $formatter->contentType());
 
       try {
          if (!$this->cache_provider->run($meta)) return;
@@ -94,7 +102,7 @@ abstract class CbAbstractProvider {
          $result = new CbContentAdapter($e->getUserData());
       }
       try {
-         $this->formatter->format(isset($meta['name']) ? $meta['name'] : '', $result);
+         $formatter->format(isset($meta['name']) ? $meta['name'] : '', $result);
       } catch (CbApiException $e) {
          $e->outputHeaders();
          echo "fatal error during output formatting: ".$e->getUserData();
