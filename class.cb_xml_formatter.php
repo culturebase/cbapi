@@ -11,27 +11,51 @@ class CbXmlFormatter implements CbContentFormatterInterface {
       return "application/xml";
    }
 
-   private function content($xml, $content)
+   private function content($document, $element, $content)
    {
-      if (!is_array($content)) {
-         $xml->addAttribute('value', $content);
-      } else {
-         foreach($content as $key => $val) {
-            if ($val !== null && $val !== '') {
-               $child = $xml->addChild('item');
-               if (!is_int($key)) $child->addAttribute('name', $key);
-               $this->content($child, $val);
-            }
+      foreach($content as $key => $val) {
+         if (!is_array($val)) {
+            $child = $document->createElement('item', htmlspecialchars($val, ENT_QUOTES));
+         } else {
+            $child = $document->createElement('item');
+            $this->content($document, $child, $val);
          }
+         if (is_int($key)) {
+            self::addAttribute($child, 'index', $key);
+         } else {
+            self::addAttribute($child, 'name', $key);
+         }
+         $element->appendChild($child);
       }
+   }
+
+   /**
+    * Simplifies adding an attribute to a DOM node.
+    *
+    * @param $node DOM node
+    * @param $name Attribute name
+    * @param $value Attribute value
+    */
+   protected static function addAttribute(DOMNode $node, $name, $value) {
+      $attribute = $node->ownerDocument->createAttribute(htmlspecialchars($name, ENT_QUOTES));
+      $attributeTextNode = $node->ownerDocument->createTextNode(htmlspecialchars($value, ENT_QUOTES));
+      $attribute->appendChild($attributeTextNode);
+      $node->appendChild($attribute);
    }
 
    public function format($name, $content)
    {
-      $xml = new SimpleXMLElement("<root/>");
-      $xml->addAttribute('name', $name);
-      $this->content($xml, $content->get());
-      echo $xml->asXML();
+      $content = $content->get();
+      $document = new DOMDocument('1.0', 'UTF-8');
+      if (!is_array($content)) {
+         $root = $document->createElement("root", htmlspecialchars($content, ENT_QUOTES));
+      } else {
+         $root = $document->createElement("root");
+         $this->content($document, $root, $content);
+      }
+      self::addAttribute($root, 'name', $name);
+      $document->appendChild($root);
+      echo $document->saveXML();
    }
 
    public function __construct($config)
