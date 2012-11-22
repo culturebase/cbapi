@@ -13,6 +13,8 @@ class CbXmlFormatter implements CbContentFormatterInterface {
 
    private function content($document, $element, $content)
    {
+      $lastKey = -1;
+      $numeric = true;
       foreach($content as $key => $val) {
          if (!is_array($val)) {
             $child = $document->createElement('item', htmlspecialchars($val, ENT_QUOTES));
@@ -20,13 +22,18 @@ class CbXmlFormatter implements CbContentFormatterInterface {
             $child = $document->createElement('item');
             $this->content($document, $child, $val);
          }
-         if (is_int($key)) {
-            self::addAttribute($child, 'index', $key);
-         } else {
-            self::addAttribute($child, 'name', $key);
+         self::addAttribute($child, 'type', self::getType($val));
+         if ($numeric) {
+            if (is_int($key)) {
+               if ($key !== ++$lastKey) $numeric = false;
+            } else {
+               $numeric = false;
+            }
          }
+         self::addAttribute($child, 'key', $key);
          $element->appendChild($child);
       }
+      self::addAttribute($element, 'numeric', $numeric);
    }
 
    /**
@@ -43,17 +50,37 @@ class CbXmlFormatter implements CbContentFormatterInterface {
       $node->appendChild($attribute);
    }
 
+   protected static function getType($val)
+   {
+      switch (gettype($val)) {
+         case "boolean":
+            return "boolean";
+         case "integer":
+         case "double":
+            return "number";
+         case "string":
+         case "object": // we don't properly serialize objects. Result will be a string
+         case "resource";
+            return "string";
+         case "NULL":
+            return "null";
+         case "array":
+            return "object";
+      }
+   }
+
    public function format($name, $content)
    {
       $content = $content->get();
       $document = new DOMDocument('1.0', 'UTF-8');
       if (!is_array($content)) {
-         $root = $document->createElement("root", htmlspecialchars($content, ENT_QUOTES));
+         $root = $document->createElement("item", htmlspecialchars($content, ENT_QUOTES));
       } else {
-         $root = $document->createElement("root");
+         $root = $document->createElement("item");
          $this->content($document, $root, $content);
       }
-      self::addAttribute($root, 'name', $name);
+      self::addAttribute($root, 'type', self::getType($content));
+      self::addAttribute($root, 'key', $name);
       $document->appendChild($root);
       echo $document->saveXML();
    }
