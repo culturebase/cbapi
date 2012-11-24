@@ -21,6 +21,17 @@ Cb::import('CbAuthorizationProviderInterface', 'CbResourceMapper', 'CbApiExcepti
 /**
  * An authorization provider that maps methods and parameters to actions and
  * resources, then checks the ACL system for authorization.
+ *
+ * It expects an authenticator class with a static method getAccount() that will
+ * return the currently logged in user's account or null if the user isn't
+ * logged in.
+ *
+ * Additionally it needs an acl_checker class which can be instantiated with the
+ * application context as constructor parameter and will then provide a method
+ * isAllowed($account, $resource, $action).
+ *
+ * You can provide authenticator and acl_checker class names as in the config
+ * array passed to the constructor, with keys "authenticator" and "acl_checker".
  */
 class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
 
@@ -28,6 +39,8 @@ class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
    protected $resource_mapping; ///< Mappers for getting resources from parameters.
    protected $action_mapping;   ///< Mapping of method => action.
    protected $resource_mapper;  ///< Resource mapper to be used if none is given.
+   protected $authenticator;    ///< Authenticator to be used.
+   protected $acl_checker;      ///< ACL checker to be used.
 
    /**
     * Create an authorization provider.
@@ -54,6 +67,10 @@ class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
       $this->action_mapping = $config['action_mapping'];
       $this->resource_mapper = $config['resource_mapper'] ?
             $config['resource_mapper'] : 'CbResourceMapper';
+      $this->authenticator = $config['authenticator'] ?
+            $config['authenticator'] : 'CbAuth';
+      $this->acl_checker = $config['acl_checker'] ?
+            $config['acl_checker'] : 'CbAcl';
    }
 
    /**
@@ -79,13 +96,10 @@ class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
       }
       $resource = $resource_mapper->get($params);
 
-      $account = null;
-      if (CbSession::has('auth') && is_array(CbSession::get('auth'))) {
-         $auth = new CbObj(CbSession::get('auth'));
-         if ($auth->isAuthenticated) $account = $auth->account;
-      }
+      $account = call_user_func(array($this->authenticator, "getAccount"));
 
-      $acl = new CbAcl($this->application);
+      $aclclass = new ReflectionClass($this->acl_checker);
+      $acl = $aclclass->newInstance($this->application);
       if (!$acl->isAllowed($account, $resource, $action)) {
          if ($account === null) {
             throw new CbApiException(401, "Please log in", array('WWW-Authenticate: Basic realm="'.$this->application.'"'));
