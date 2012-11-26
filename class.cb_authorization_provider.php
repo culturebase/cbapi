@@ -81,6 +81,16 @@ class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
     */
    function assert($method, array $params)
    {
+      $account = call_user_func(array($this->authenticator, "getAccount"));
+
+      /* allow inline HTTP login; as we return 401s we should do this. */
+      if (isset($_SERVER['PHP_AUTH_USER'])) {
+         if ($account === null || $account !== $_SERVER['PHP_AUTH_USER']) {
+            call_user_func(array($this->authenticator, "login"),
+                  $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
+         }
+      }
+
       if (isset($this->action_mapping)) {
          $action = $this->action_mapping[$method];
       }
@@ -95,8 +105,6 @@ class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
          $resource_mapper = $class->newInstance($this->config);
       }
       $resource = $resource_mapper->get($params);
-
-      $account = call_user_func(array($this->authenticator, "getAccount"));
 
       $aclclass = new ReflectionClass($this->acl_checker);
       $acl = $aclclass->newInstance($this->application);

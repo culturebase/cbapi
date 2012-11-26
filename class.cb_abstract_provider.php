@@ -24,18 +24,8 @@ Cb::import('InterfaceCbAuthorizationProvider', 'CbAuthorizationProvider', 'CbCon
  * You can specify an authorization provider which checks if the specified
  * method is allowed. If no authorization provider is given all actions are
  * allowed.
- *
- * The provider expects an authenticator class with a static method getAccount()
- * that will return the currently logged in user's account or null if the user
- * isn't logged in. Additionally there must be a method login($name, $passwd)
- * which will be called to fulfill authentication requests from respective
- * headers.
- *
- * You can provide the authenticator class name as in the config array passed to
- * the constructor, with the key "authenticator".
  */
 abstract class CbAbstractProvider {
-   protected $authenticator;   ///< Authenticator to be used for validating auth headers.
    protected $auth_provider;   ///< Authorization provider to check ACLs.
    protected $handlers;        ///< Handlers for specific methods.
    protected $default_handler; ///< Handler to be called if no specific handler is given.
@@ -78,8 +68,6 @@ abstract class CbAbstractProvider {
       $this->formatter = $config['formatter'] ?
             $this->instantiate($config['formatter']) :
             new CbContentFormatter($config);
-      $this->authenticator = $config['authenticator'] ?
-            $config['authenticator'] : 'CbAuth';
    }
 
    /**
@@ -113,18 +101,6 @@ abstract class CbAbstractProvider {
 
       try {
          if (!$this->cache_provider->run($meta)) return;
-
-         /* allow inline HTTP login; as we return 401s we should do this, no
-          * matter if an auth_provider is given.
-          */
-         if (isset($_SERVER['PHP_AUTH_USER'])) {
-            $account = call_user_func(array($this->authenticator, "getAccount"));
-            if ($account === null || $account !== $_SERVER['PHP_AUTH_USER']) {
-               call_user_func(array($this->authenticator, "login"),
-                     $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
-            }
-         }
-
          if ($this->auth_provider) $this->auth_provider->assert($method, $request);
          $result = $this->execHandler($method, $request);
       } catch (CbApiException $e) {
