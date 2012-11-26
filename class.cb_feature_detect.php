@@ -110,7 +110,9 @@ class CbFeatureDetect {
    {
       if ($_COOKIE[$this->session_name] === 'done') {
          // don't rerun, even if features haven't been saved
-         return array_merge($this->detectBaseFeatures(), $this->features);
+         $this->features = array_merge($this->detectBaseFeatures(), $this->features);
+         $_SESSION[$this->session_name] = $this->features;
+         return $this->features;
       } else if ($_COOKIE[$this->session_name] === 'running' ||
             isset($_GET[$this->js]) || !empty($_POST)) {
          // some information about features is given in request. Evaluate.
@@ -143,6 +145,7 @@ class CbFeatureDetect {
                'javascript' => false,
                'cookies'    => $browser->Cookies
             );
+            $_SESSION[$this->session_name] = $this->features;
             return $this->features;
          }
       }
