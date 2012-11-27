@@ -44,13 +44,17 @@ class CbCacheProvider {
          case "public":
             header("Expires: $future");
             header("Cache-Control: public, max-age=$interval");
+            header("Pragma: stupid-php-makes-me-send-this-please-ignore");
             break;
          case "private_no_expire":
+            header("Expires: $future"); // TODO: use header_remove when upgrading to PHP 5.3
             header("Cache-Control: private, max-age=$interval, pre-check=$interval");
+            header("Pragma: stupid-php-makes-me-send-this-please-ignore"); // TODO: use header_remove when upgrading to PHP 5.3
             break;
          case "private":
             header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
             header("Cache-Control: private, max-age=$interval, pre-check=$interval");
+            header("Pragma: stupid-php-makes-me-send-this-please-ignore"); // TODO: use header_remove when upgrading to PHP 5.3
             break;
          default: // covers 'nocache' and ''
             header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
