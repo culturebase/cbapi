@@ -62,14 +62,14 @@ class CbHtmlFormatter implements CbContentFormatterInterface {
          echo "<div>".htmlentities($content)."</div>";
       } else {
          foreach($content as $key => $val) {
-            if ($val !== null && $val !== '') {
-               if (!is_int($key)) {
-                  if ($level < 7) {
-                     echo "<h$level>".htmlentities($key)."</h$level>";
-                  } else {
-                     echo "<span>".htmlentities($key)."</span>";
-                  }
+            if (!is_int($key)) {
+               if ($level < 7) {
+                  echo "<h$level>".htmlentities($key)."</h$level>";
+               } else {
+                  echo "<span>".htmlentities($key)."</span>";
                }
+            }
+            if ($val !== null && $val !== '') {
                $this->content($val, $level + 1);
             }
          }
