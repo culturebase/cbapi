@@ -32,6 +32,9 @@ class CbXmlFormatter implements CbContentFormatterInterface {
       $lastKey = -1;
       $numeric = true;
       foreach($content as $key => $val) {
+         if (is_object($val) && method_exists($val, 'toArray')) {
+            $val = $val->toArray();
+         }
          if (!is_array($val)) {
             $child = $document->createElement('item', htmlspecialchars($val, ENT_QUOTES));
          } else {
@@ -89,6 +92,9 @@ class CbXmlFormatter implements CbContentFormatterInterface {
    {
       $content = $content->get();
       $document = new DOMDocument('1.0', 'UTF-8');
+      if (is_object($content) && method_exists($content, 'toArray')) {
+         $content = $content->toArray();
+      }
       if (!is_array($content)) {
          $root = $document->createElement("item", htmlspecialchars($content, ENT_QUOTES));
       } else {
