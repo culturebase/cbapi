@@ -86,8 +86,13 @@ class CbAuthorizationProvider implements CbAuthorizationProviderInterface {
       /* allow inline HTTP login; as we return 401s we should do this. */
       if (isset($_SERVER['PHP_AUTH_USER'])) {
          if ($account === null || $account !== $_SERVER['PHP_AUTH_USER']) {
-            call_user_func(array($this->authenticator, "login"),
+            $auth = call_user_func(array($this->authenticator, "login"),
                   $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
+            if (is_array($auth)) {
+               $account = $auth['account'];
+            } else if (is_string($auth)) {
+               $account = $auth;
+            }
          }
       }
 

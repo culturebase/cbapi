@@ -78,40 +78,45 @@ abstract class CbAbstractProvider {
     */
    public function handle(array $request = null)
    {
-      if (!$request) $request = array_merge($_COOKIE, $_POST, $_GET);
-      $method = isset($request['method']) ? $request['method'] : strtolower($_SERVER['REQUEST_METHOD']);
-      $meta = $this->getMetadata($method, $request);
-      if (isset($meta['vary'])) {
-         $vary = array_map("ucfirst", array_map("strtolower",
-               is_array($meta['vary']) ? $meta['vary'] : array($meta['vary'])));
-         if (!in_array("Accept", $vary)) $vary[] = 'Accept';
-         header('Vary: '. implode(',', $vary), false);
-      } else {
-         header('Vary: Accept', false);
-      }
-      if (method_exists($this->formatter, 'negotiate')) {
-         $formatter = $this->formatter->negotiate(
-               isset($meta['formats']) ? $meta['formats'] : null,
-               isset($request['format']) ? $request['format'] : null
-         );
-      } else {
-         $formatter = $this->formatter;
-      }
-      header('Content-type: ' . $formatter->contentType());
+      try {
+         if (!$request) $request = array_merge($_COOKIE, $_POST, $_GET);
+         $method = isset($request['method']) ? $request['method'] : strtolower($_SERVER['REQUEST_METHOD']);
+         $meta = $this->getMetadata($method, $request);
+         if (isset($meta['vary'])) {
+            $vary = array_map("ucfirst", array_map("strtolower",
+                  is_array($meta['vary']) ? $meta['vary'] : array($meta['vary'])));
+            if (!in_array("Accept", $vary)) $vary[] = 'Accept';
+            header('Vary: '. implode(',', $vary), false);
+         } else {
+            header('Vary: Accept', false);
+         }
+         if (method_exists($this->formatter, 'negotiate')) {
+            $formatter = $this->formatter->negotiate(
+                  isset($meta['formats']) ? $meta['formats'] : null,
+                  isset($request['format']) ? $request['format'] : null
+            );
+         } else {
+            $formatter = $this->formatter;
+         }
+         header('Content-type: ' . $formatter->contentType());
 
-      try {
-         if (!$this->cache_provider->run($meta)) return;
-         if ($this->auth_provider) $this->auth_provider->assert($method, $request);
-         $result = $this->execHandler($method, $request);
-      } catch (CbApiException $e) {
-         $e->outputHeaders();
-         $result = new CbContentAdapter($e->getUserData());
-      }
-      try {
-         $formatter->format(isset($meta['name']) ? $meta['name'] : '', $result);
-      } catch (CbApiException $e) {
-         $e->outputHeaders();
-         echo "fatal error during output formatting: ".$e->getUserData();
+         $name = isset($meta['name']) ? $meta['name'] : '';
+         try {
+            if (!$this->cache_provider->run($meta)) return;
+            if ($this->auth_provider) $this->auth_provider->assert($method, $request);
+            $result = $this->execHandler($method, $request);
+            $formatter->format($name, $result);
+         } catch (CbApiException $e) {
+            $e->outputHeaders();
+            if (method_exists($formatter, 'exception')) {
+               $formatter->exception($name, $request, $e);
+            } else {
+               $formatter->format($name, new CbContentAdapter($e->getUserData()));
+            }
+         }
+      } catch (Exception $e) {
+         header("HTTP/1.0 500 Internal Server Error");
+         die();
       }
    }
 
