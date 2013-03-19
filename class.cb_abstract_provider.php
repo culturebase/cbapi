@@ -80,7 +80,7 @@ abstract class CbAbstractProvider {
    {
       try {
          if (!$request) $request = array_merge($_COOKIE, $_POST, $_GET);
-         $method = isset($request['method']) ? $request['method'] : strtolower($_SERVER['REQUEST_METHOD']);
+         $method = strtolower(isset($request['method']) ? $request['method'] : $_SERVER['REQUEST_METHOD']);
          $meta = $this->getMetadata($method, $request);
          if (isset($meta['vary'])) {
             $vary = array_map("ucfirst", array_map("strtolower",
